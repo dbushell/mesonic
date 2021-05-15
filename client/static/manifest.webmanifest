@@ -1,0 +1,15 @@
+{
+  "name": "meSonic",
+  "short_name": "meSonic",
+  "icons": [
+    {
+      "src": "/512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#f4ab0b",
+  "background_color": "#f4ab0b",
+  "display": "standalone",
+  "start_url": "/"
+}

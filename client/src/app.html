@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html class="min-vh-100" dir="ltr" lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preload" as="font" href="/inter-variable.woff2" type="font/woff2" crossorigin>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/favicon.svg">
+<link rel="mask-icon" color="#f4ab0b" href="/mask-icon.svg">
+<link rel="apple-touch-icon" href="/180x180.png">
+<meta name="application-name" content="Mesonic">
+<meta name="theme-color" content="#f4ab0b">
+<link rel="stylesheet" href="/bootstrap.min.css">
+<style type="text/css">
+@font-face {
+  font-family: 'Inter';
+  src: url('/inter-variable.woff2') format('woff2');
+  font-display: swap;
+  font-weight: 1 900;
+  font-style: normal;
+}
+:root {
+  --bs-font-sans-serif:Inter,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans","Liberation Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+}
+.bi {
+  width: 1em;
+  height: 1em;
+  display: inline-block;
+  vertical-align: -0.125em;
+}
+.container-fluid {
+  --bs-gutter-x: 3vw;
+  max-width: 60rem;
+}
+.bs-popover-top > .popover-arrow::after {
+  border-top-color: currentColor;
+}
+.popover-body.fs-7 {
+  font-weight: 600;
+}
+nav[aria-label='breadcrumb'] {
+  max-width: 100%;
+}
+.breadcrumb.text-nowrap .breadcrumb-item {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.breadcrumb.text-nowrap .breadcrumb-item:not(:last-of-type) {
+  flex-shrink: 2;
+}
+.breadcrumb.text-nowrap .breadcrumb-item * {
+  display: contents;
+}
+.btn-toolbar .btn:not(:disabled) {
+  z-index: 1;
+}
+.fs-7 {
+  font-size: 0.75rem !important;
+}
+.btn {
+  font-weight: 500;
+}
+.badge {
+  font-weight: 500;
+}
+.flex-column > * {
+  min-width: 0;
+}
+</style>
+<script>
+const {host, protocol} = window.location;
+if (/(localhost|127\.0)/.test(host)) {
+  window.MESONIC_HOST = `${protocol}//${host}`;
+} else {
+  window.MESONIC_HOST = 'https://mesonic.app';
+  if ('serviceWorker' in window.navigator) {
+    window.navigator.serviceWorker.register('/sw.js');
+  }
+}
+</script>
+%svelte.head%
+</head>
+<body class="min-vh-100">
+  <div class="min-vh-100 d-flex flex-column" id="svelte">%svelte.body%</div>
+</body>
+</html>

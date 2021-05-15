@@ -1,0 +1,30 @@
+# meSonic dev server
+version: "3"
+
+networks:
+  traefik:
+    external: true
+
+services:
+  mesonic:
+    container_name: mesonic
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: dbushell/mesonic
+    restart: unless-stopped
+    volumes:
+      - ./config:/config
+      - /Volumes/Audiobooks:/data:ro
+      - ./server:/home/user/server
+      - ./client:/home/user/client
+    environment:
+      - MESONIC_DEV=1
+    networks:
+      - traefik
+    ports:
+      - 12080:12080
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mesonic.rule=Host(`mesonic.localhost`)"
+      - "traefik.http.services.mesonic.loadbalancer.server.port=4040"

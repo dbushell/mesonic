@@ -1,0 +1,22 @@
+{
+  "subsonic-response": {
+    "status": "ok",
+    "version": "1.16.0",
+    "artists": {
+      "ignoredArticles": "",
+      "index": [
+        {
+          "name": "H",
+          "artist": [
+            {
+              "id": 1,
+              "name": "Herman Melville",
+              "title": "Test Arist",
+              "albumCount": 1
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
