@@ -13,7 +13,7 @@
   type="button"
   aria-label="Play"
   class="btn btn-outline-primary"
-  style="min-width: 3.5rem"
+  style="min-width: 3.5rem;"
 >
   <Play />
 </button>
