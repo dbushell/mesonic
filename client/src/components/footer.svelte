@@ -6,7 +6,7 @@
 
 <footer class="container-fluid pb-5 mt-auto" aria-label="meSonic information">
   <p class="fs-7 text-dark text-center m-0">
-    v0.12.8 &nbsp;|&nbsp; © {year}
+    v0.12.9 &nbsp;|&nbsp; © {year}
     <a href="https://dbushell.com/" class="text-dark" target="_blank">
       David Bushell
     </a>
