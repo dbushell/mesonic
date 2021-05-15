@@ -89,6 +89,7 @@ export const bookmarkStore = derived(
       }
     } catch (err) {
       console.log(err);
+      set([]);
     }
   },
   []

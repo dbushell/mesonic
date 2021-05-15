@@ -7,10 +7,10 @@
 
   const dispatch = createEventDispatcher();
 
-  let song;
-  let album;
   let isError = false;
   let isLoading = true;
+  let song;
+  let album;
   let albums = [];
   const unsubscribe = [];
 
@@ -34,7 +34,7 @@
     albumListStore.subscribe((store) => {
       isLoading = store === 'loading';
       isError = store === 'error';
-      if (!isError && !isLoading) {
+      if (Array.isArray(store)) {
         albums = [...store];
       }
     })

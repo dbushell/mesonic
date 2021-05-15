@@ -6,11 +6,10 @@
 
   const dispatch = createEventDispatcher();
 
-  let song;
   let isError = false;
   let isLoading = true;
+  let song;
   let songs = [];
-  let bookmarks = [];
   let unsubscribe = [];
 
   onDestroy(() => {
@@ -27,23 +26,18 @@
     songListStore.subscribe((store) => {
       isLoading = store === 'loading';
       isError = store === 'error';
-      if (!isError && !isLoading) {
+      if (Array.isArray(store)) {
         songs = [...store];
       }
     })
   );
 
-  unsubscribe.push(
-    bookmarkStore.subscribe((store) => {
-      bookmarks = [...store];
-    })
-  );
-
   $: {
-    bookmarks.forEach((bookmark) => {
-      songs.find((song, i) => {
+    songs.map((song, i) => {
+      songs[i].progress = 0;
+      $bookmarkStore.find((bookmark) => {
         if (song.id === bookmark?.entry[0]?.id) {
-          songs[i].bookmark = bookmark;
+          songs[i].progress = bookmark.progress;
           return true;
         }
       });
@@ -77,13 +71,13 @@
         <span class="badge bg-light text-dark">
           {formatTime(item.duration)}
         </span>
-        {#if item?.bookmark?.progress}
+        {#if item.progress}
           <div class="progress w-100 mt-2 mb-1" style="height: 2px;">
             <div
               class="progress-bar bg-success"
               role="progressbar"
-              style="width: {item?.bookmark?.progress}%;"
-              aria-valuenow={Math.round(item?.bookmark?.progress)}
+              style="width: {item.progress}%;"
+              aria-valuenow={Math.round(item.progress)}
               aria-valuemin="0"
               aria-valuemax="100"
             />

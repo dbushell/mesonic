@@ -19,6 +19,7 @@
   let song;
   let nextSong;
   let bookmarks = [];
+  let bookmarkInterval;
   let seekingTimeout;
   let seekTimeout;
   let onLoadedPosition = 0;
@@ -38,10 +39,6 @@
     rangeEnd = formatTime(rangeMax - rangeValue);
   }
 
-  onDestroy(() => {
-    unsubscribe.forEach((fn) => fn());
-  });
-
   const resetAudio = () => {
     isLoaded = false;
     isSeeking = false;
@@ -50,6 +47,8 @@
     rangeMax = 0;
     rangeStart = '00:00';
     rangeEnd = '00:00';
+    clearTimeout(seekTimeout);
+    clearInterval(bookmarkInterval);
     if (audio) {
       audio.currentTime = 0;
     }
@@ -63,6 +62,11 @@
       }
     }
   };
+
+  onDestroy(() => {
+    unsubscribe.forEach((fn) => fn());
+    resetAudio();
+  });
 
   unsubscribe.push(
     playbackStore.subscribe((playback) => {
@@ -137,6 +141,13 @@
 
   const onPlay = () => {
     isPlaying = true;
+    bookmarkInterval = setInterval(() => {
+      if (isPlaying) {
+        setBookmark();
+      } else {
+        clearInterval(bookmarkInterval);
+      }
+    }, 30000);
   };
 
   const onPause = () => {
