@@ -58,10 +58,10 @@
         on:click={() => dispatch('album', {...item})}
         type="button"
         class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
-        class:text-primary={song && song.artistId === item.id}
+        class:text-primary={song && song.albumId === item.id}
       >
         <span>
-          {#if song && song.artistId === item.id}
+          {#if song && song.albumId === item.id}
             <Headphones />
           {:else if album && album.id === item.id}
             <Folder />

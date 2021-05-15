@@ -1,4 +1,4 @@
-const ver = `0.13.0`;
+const ver = `0.13.1`;
 const cacheName = `svelte-${ver}`;
 
 const preCache = [`/`];
