@@ -124,7 +124,7 @@
   </div>
   <div class="mb-3">
     <label
-      for="username"
+      for="password"
       class="form-label d-flex flex-wrap align-items-baseline justify-content-between"
     >
       <span class="me-2">Password</span>

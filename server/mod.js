@@ -7,7 +7,7 @@ import {getRequestData} from './utils.js';
 
 await tasks.checkEnv();
 
-log.info('meSonic v0.13.1');
+log.info('meSonic v0.13.2');
 
 // Return the version
 if (Deno.args.includes('--version')) {

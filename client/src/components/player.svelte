@@ -194,7 +194,7 @@
 
 <svelte:window on:beforeunload|capture={onBeforeUnload} />
 <aside
-  class="container-fluid mt-0 mb-3 pt-4 pb-3 bg-white border-bottom"
+  class="container-fluid mt-0 mb-3 py-3 bg-white border-bottom"
   style="position: sticky; top: 0; z-index: 99;"
 >
   <div class="mb-2 d-flex flex-wrap align-items-center">
