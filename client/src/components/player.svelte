@@ -1,19 +1,20 @@
 <script>
-  import {onDestroy, createEventDispatcher} from 'svelte';
+  import {onDestroy} from 'svelte';
   import {
     songStore,
     nextSongStore,
     bookmarkStore,
-    playbackStore
+    playbackStore,
+    serverStore,
+    addServerParams,
+    createBookmark,
+    deleteBookmark
   } from '../stores.js';
-  import {createBookmark, deleteBookmark} from '../actions.js';
   import {formatTime} from '../utils.js';
   import RewindButton from './rewind.svelte';
   import ForwardButton from './forward.svelte';
   import PauseButton from './pause.svelte';
   import PlayButton from './play.svelte';
-
-  const dispatch = createEventDispatcher();
 
   let audio;
   let song;
@@ -80,7 +81,13 @@
   );
 
   unsubscribe.push(
-    songStore.subscribe((newSong) => {
+    songStore.subscribe(async (newSong) => {
+      if (newSong && !newSong.stream) {
+        const url = await addServerParams(
+          new URL(`/rest/stream.view?id=${newSong.id}`, $serverStore)
+        );
+        newSong.stream = url.href;
+      }
       if (song && newSong) {
         if (song.id !== newSong.id) {
           if (isPlaying) {
@@ -147,7 +154,7 @@
       } else {
         clearInterval(bookmarkInterval);
       }
-    }, 30000);
+    }, 60000);
   };
 
   const onPause = () => {
@@ -169,7 +176,7 @@
     isPlaying = false;
     deleteBookmark({id: song.id});
     if (nextSong) {
-      dispatch('song', {...nextSong, autoplay: true});
+      songStore.set({...nextSong, autoplay: true});
     }
   };
 
@@ -204,20 +211,18 @@
         {isLoaded ? '' : 'Loading: '}{song.title}
       </p>
       <div class="d-flex flex-wrap">
-        <button
-          on:click={() => dispatch('artist', {id: song.artistId})}
+        <a
+          href={`/artist/${song.artistId}`}
           class="btn btn-link text-dark p-0 fs-7 fw-normal me-2"
-          type="button"
         >
           {song.artist}
-        </button>
-        <button
-          on:click={() => dispatch('album', {id: song.albumId})}
+        </a>
+        <a
+          href={`/album/${song.albumId}`}
           class="btn btn-link text-dark p-0 fs-7 fw-normal"
-          type="button"
         >
           {song.album}
-        </button>
+        </a>
       </div>
     {:else}
       <p class="h6 lh-base m-0 text-dark">Not playing…</p>

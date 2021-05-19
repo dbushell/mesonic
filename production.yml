@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  mesonic:
+    container_name: mesonic
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: dbushell/mesonic
+    restart: unless-stopped
+    volumes:
+      - ./config:/config
+      - /Volumes/Audiobooks:/data:ro
+      - ./server:/home/user/server
+      - ./client:/home/user/client
+    environment:
+      - MESONIC_HOST=http://mesonic.localhost:4040
+    ports:
+      - 4040:4040

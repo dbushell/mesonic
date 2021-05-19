@@ -1,9 +1,4 @@
-# meSonic dev server
-version: "3"
-
-networks:
-  traefik:
-    external: true
+version: '3'
 
 services:
   mesonic:
@@ -19,12 +14,8 @@ services:
       - ./server:/home/user/server
       - ./client:/home/user/client
     environment:
+      - MESONIC_HOST=http://mesonic.localhost:4040
       - MESONIC_DEV=1
-    networks:
-      - traefik
     ports:
       - 12080:12080
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.mesonic.rule=Host(`mesonic.localhost`)"
-      - "traefik.http.services.mesonic.loadbalancer.server.port=4040"
+      - 4040:4040

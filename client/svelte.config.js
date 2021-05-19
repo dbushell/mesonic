@@ -1,4 +1,13 @@
-import adapter from '@sveltejs/adapter-static';
+import nodeAdapter from '@sveltejs/adapter-node';
+import staticAdapter from '@sveltejs/adapter-static';
+
+// Default to static build
+let adapter = staticAdapter;
+
+// Use node server if inside Docker container
+if ('MESONIC_CONFIG' in process.env) {
+  adapter = nodeAdapter;
+}
 
 const config = {
   kit: {
@@ -11,11 +20,7 @@ const config = {
       }
     },
     target: '#svelte',
-    adapter: adapter({
-      pages: 'build',
-      assets: 'build',
-      fallback: null
-    })
+    adapter: adapter()
   }
 };
 

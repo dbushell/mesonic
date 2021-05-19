@@ -1,13 +1,14 @@
 <script>
+  import { goto } from '$app/navigation';
   import {onDestroy} from 'svelte';
   import {
-    addServerParams,
     authStore,
     serverStore,
     playbackStore,
-    scanStore
+    scanStore,
+    updateServer,
+    getScanStatus
   } from '../stores.js';
-  import {getScanStatus} from '../actions.js';
 
   const rates = ['1.0', '1.2', '1.4', '1.6', '1.8', '2.0'];
   let rate = '1.0';
@@ -48,19 +49,10 @@
       username: data.get('username'),
       password: data.get('password')
     });
-    try {
-      const server = new URL(data.get('server'));
-      let url = new URL('/rest/ping.view', server);
-      await addServerParams(url);
-      const response = await fetch(url);
-      const json = await response.json();
-      if (json['subsonic-response'].status === 'ok') {
-        serverStore.set(server);
-        return;
-      }
-      throw new Error('Server not responding');
-    } catch (err) {
-      console.log(err);
+    const isSuccess = await updateServer(data.get('server'));
+    if (isSuccess) {
+      goto('/');
+    } else {
       document.querySelector('#server').focus();
       isError = true;
     }

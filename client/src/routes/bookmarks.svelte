@@ -1,29 +1,38 @@
+<script context="module">
+  import {browser} from '$app/env';
+  import {songStore, fetchBookmarks} from '../stores.js';
+
+  export const load = async ({fetch, session}) => {
+    const props = {};
+    if (session.isStatic && !browser) {
+      props.fetch = fetch;
+    }
+    return {
+      props: {
+        bookmarks: await fetchBookmarks(props)
+      }
+    };
+  };
+</script>
+
 <script>
-  import {onDestroy, createEventDispatcher} from 'svelte';
-  import {bookmarkStore} from '../stores.js';
-  import {deleteBookmark} from '../actions.js';
+  import {onDestroy} from 'svelte';
+  import {deleteBookmark, bookmarkStore} from '../stores.js';
   import {formatTime} from '../utils.js';
 
-  const dispatch = createEventDispatcher();
+  export let bookmarks = [];
 
-  let isError = false;
-  let isLoading = true;
-  let bookmarks = [];
-  const unsubscribe = [];
+  let unsubBookmarks;
 
-  onDestroy(() => {
-    unsubscribe.forEach((fn) => fn());
+  unsubBookmarks = bookmarkStore.subscribe((state) => {
+    bookmarks = state;
   });
 
-  unsubscribe.push(
-    bookmarkStore.subscribe((store) => {
-      isLoading = store === 'loading';
-      isError = store === 'error';
-      if (!isError && !isLoading) {
-        bookmarks = [...store];
-      }
-    })
-  );
+  onDestroy(() => unsubBookmarks());
+
+  const onSong = (nextSong) => {
+    songStore.set({...nextSong});
+  };
 
   const onDelete = async (id) => {
     if (window.confirm('Delete bookmark?')) {
@@ -34,16 +43,9 @@
 
 <div class="list-group">
   <h2 class="visually-hidden">Bookmarks</h2>
-  {#if isError}
-    <div class="list-group-item text-danger border-danger">
-      Failed to fetch bookmarks
-    </div>
-  {:else if isLoading}
-    <div class="list-group-item bg-light text-dark">Loading…</div>
+  {#if bookmarks.length === 0}
+    <div class="list-group-item bg-light text-dark">No bookmarks found</div>
   {:else}
-    {#if bookmarks.length === 0}
-      <div class="list-group-item bg-light text-dark">No bookmarks found</div>
-    {/if}
     {#each bookmarks as item (item.entry[0].id)}
       <article
         class="list-group-item d-flex flex-wrap justify-content-between align-items-center"
@@ -62,7 +64,7 @@
           </p>
           <div class="d-flex my-1">
             <button
-              on:click={() => dispatch('song', {...item.entry[0]})}
+              on:click={() => onSong(item.entry[0])}
               type="button"
               class="btn me-2 btn-sm btn-outline-secondary"
             >

@@ -4,7 +4,7 @@
 
 See the blog articles below for more information.
 
-<img src="./.github/mesonic@2x.png" alt="meSonic progressive web app screenshot" width="420" height="560">
+<img src="./.github/mesonic@2x.png" alt="meSonic progressive web app screenshot" width="420">
 
 * * *
 

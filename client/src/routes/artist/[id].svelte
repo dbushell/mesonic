@@ -1,15 +1,15 @@
 <script context="module">
   import {browser} from '$app/env';
-  import {fetchArtists} from '../stores.js';
+  import {fetchAlbums} from '../../stores.js';
 
-  export const load = async ({fetch, session}) => {
-    const props = {};
+  export const load = async ({fetch, page, session}) => {
+    const props = {id: page.params.id};
     if (session.isStatic && !browser) {
       props.fetch = fetch;
     }
     return {
       props: {
-        artists: await fetchArtists(props)
+        albums: await fetchAlbums(props)
       }
     };
   };
@@ -17,14 +17,15 @@
 
 <script>
   import {onDestroy} from 'svelte';
-  import {artistStore, songStore} from '../stores.js';
-  import Headphones from '../icons/headphones.svelte';
-  import Folder from '../icons/folder.svelte';
+  import {albumStore, songStore} from '../../stores.js';
+  import {formatTime} from '../../utils.js';
+  import Headphones from '../../icons/headphones.svelte';
+  import Folder from '../../icons/folder.svelte';
 
-  export let artists = [];
+  export let albums = [];
 
-  let artist;
   let song;
+  let album;
   let unsubscribe = [];
 
   onDestroy(() => {
@@ -32,8 +33,8 @@
   });
 
   unsubscribe.push(
-    artistStore.subscribe((state) => {
-      artist = state;
+    albumStore.subscribe((state) => {
+      album = state;
     })
   );
 
@@ -45,28 +46,28 @@
 </script>
 
 <div class="list-group">
-  <h2 class="visually-hidden">Artists</h2>
-  {#if artists.length === 0}
+  <h2 class="visually-hidden">Albums</h2>
+  {#if albums.length === 0}
     <div class="list-group-item text-danger border-danger">
-      Failed to fetch artists
+      Failed to fetch albums
     </div>
   {:else}
-    {#each artists as item (item.id)}
+    {#each albums as item (item.id)}
       <a
-        href="/artist/{item.id}"
+        href="/album/{item.id}"
         class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
-        class:text-primary={song && song.artistId === item.id}
+        class:text-primary={song && song.albumId === item.id}
       >
         <span>
-          {#if song && song.artistId === item.id}
+          {#if song && song.albumId === item.id}
             <Headphones />
-          {:else if artist && artist.id === item.id}
+          {:else if album && album.id === item.id}
             <Folder />
           {/if}
           {item.name}
         </span>
         <span class="badge bg-light text-dark">
-          {item.albumCount}
+          {item.duration ? formatTime(item.duration) : item.songCount}
         </span>
       </a>
     {/each}

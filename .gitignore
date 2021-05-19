@@ -3,6 +3,7 @@
 !server
 !.github
 !.gitignore
-!docker-compose.yml
+!development.yml
+!production.yml
 !Dockerfile
 !README.md

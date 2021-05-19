@@ -1,4 +1,3 @@
-# meSonic dev server
 FROM ghcr.io/dbushell/ubuntu
 
 COPY --from=caddy:latest /usr/bin/caddy /usr/bin/caddy

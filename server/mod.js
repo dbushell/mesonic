@@ -7,7 +7,7 @@ import {getRequestData} from './utils.js';
 
 await tasks.checkEnv();
 
-log.info('meSonic v0.13.2');
+log.info('meSonic v0.14.1');
 
 // Return the version
 if (Deno.args.includes('--version')) {
@@ -212,7 +212,10 @@ const onConn = async (conn) => {
 
 const server = Deno.listen({port: 8080});
 
-log.info(`🚀 Launched: http://localhost:8080`);
+log.info(`🚀 Launched`);
+log.info(`Server: http://localhost:8080`);
+log.info(`Client: http://localhost:3000`);
+log.info(`Proxy:  http://localhost:4040`);
 
 for await (const conn of server) {
   try {

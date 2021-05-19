@@ -1,15 +1,29 @@
+<script context="module">
+  import {browser} from '$app/env';
+  import {fetchSongs} from '../../stores.js';
+
+  export const load = async ({fetch, page, session}) => {
+    const props = {id: page.params.id};
+    if (session.isStatic && !browser) {
+      props.fetch = fetch;
+    }
+    return {
+      props: {
+        songs: await fetchSongs(props)
+      }
+    };
+  };
+</script>
+
 <script>
-  import {onDestroy, createEventDispatcher} from 'svelte';
-  import {songStore, songListStore, bookmarkStore} from '../stores.js';
-  import {formatTime} from '../utils.js';
-  import Headphones from '../icons/headphones.svelte';
+  import {onDestroy} from 'svelte';
+  import {songStore, bookmarkStore} from '../../stores.js';
+  import {formatTime} from '../../utils.js';
+  import Headphones from '../../icons/headphones.svelte';
 
-  const dispatch = createEventDispatcher();
+  export let songs = [];
 
-  let isError = false;
-  let isLoading = true;
   let song;
-  let songs = [];
   let unsubscribe = [];
 
   onDestroy(() => {
@@ -19,16 +33,6 @@
   unsubscribe.push(
     songStore.subscribe((state) => {
       song = state;
-    })
-  );
-
-  unsubscribe.push(
-    songListStore.subscribe((store) => {
-      isLoading = store === 'loading';
-      isError = store === 'error';
-      if (Array.isArray(store)) {
-        songs = [...store];
-      }
     })
   );
 
@@ -43,23 +47,22 @@
       });
     });
   }
+
+  const onSong = (song) => {
+    songStore.set(song);
+  };
 </script>
 
 <div class="list-group">
   <h2 class="visually-hidden">Songs</h2>
-  {#if isError}
+  {#if songs.length === 0}
     <div class="list-group-item text-danger border-danger">
       Failed to fetch songs
     </div>
-  {:else if isLoading}
-    <div class="list-group-item bg-light text-dark">Loading…</div>
   {:else}
-    {#if songs.length === 0}
-      <div class="list-group-item bg-light text-dark">No songs found</div>
-    {/if}
     {#each songs as item (item.id)}
       <button
-        on:click={() => dispatch('song', {...item})}
+        on:click={onSong({...item})}
         type="button"
         class="list-group-item list-group-item-action d-flex flex-wrap justify-content-between align-items-center"
         class:text-primary={song && song.id === item.id}
