@@ -1,10 +1,10 @@
 <script context="module">
-  import {browser} from '$app/env';
+  import {prerendering} from '$app/env';
   import {songStore, fetchBookmarks} from '../stores.js';
 
-  export const load = async ({fetch, session}) => {
+  export const load = async ({fetch}) => {
     const props = {};
-    if (session.isStatic && !browser) {
+    if (prerendering) {
       props.fetch = fetch;
     }
     return {
@@ -41,8 +41,8 @@
   };
 </script>
 
+<h2 class="visually-hidden">Bookmarks</h2>
 <div class="list-group">
-  <h2 class="visually-hidden">Bookmarks</h2>
   {#if bookmarks.length === 0}
     <div class="list-group-item bg-light text-dark">No bookmarks found</div>
   {:else}
@@ -64,9 +64,9 @@
           </p>
           <div class="d-flex my-1">
             <button
-              on:click={() => onSong(item.entry[0])}
+              on:click={() => onSong({...item.entry[0], autoplay: true})}
               type="button"
-              class="btn me-2 btn-sm btn-outline-secondary"
+              class="btn me-2 btn-sm btn-outline-success"
             >
               Resume
             </button>
@@ -80,7 +80,7 @@
           </div>
         </div>
         {#if item.progress}
-          <div class="progress w-100 my-2" style="height: 2px;">
+          <div class="progress w-100 my-2" style="height: 0.125rem;">
             <div
               class="progress-bar bg-success"
               role="progressbar"

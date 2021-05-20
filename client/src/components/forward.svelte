@@ -11,8 +11,8 @@
   disabled={isDisabled}
   on:click={() => dispatch('click')}
   type="button"
-  aria-label="Fast-foward 30 seconds"
-  class="btn btn-outline-primary"
+  aria-label="fast-foward 30 seconds"
+  class="btn btn-outline-primary text-nowrap"
 >
   <span
     class="fs-7"

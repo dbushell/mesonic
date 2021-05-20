@@ -1,5 +1,5 @@
 <script>
-  import {page} from '$app/stores';
+  import {navigating, page} from '$app/stores';
   import Browse from '../icons/browse.svelte';
   import Settings from '../icons/settings.svelte';
   import Bookmarks from '../icons/bookmarks.svelte';
@@ -9,6 +9,15 @@
   let isBookmarks;
   let isSettings;
   let isBrowse;
+  // let isLoading;
+
+  // navigating.subscribe((state) => {
+  //   if (state) {
+  //     isLoading = true;
+  //   } else {
+  //     setTimeout(() => (isLoading = false), 750);
+  //   }
+  // });
 
   $: {
     isBookmarks = /^\/bookmarks/.test($page.path);
@@ -21,18 +30,19 @@
   <nav class="container-fluid align-items-end">
     <h1 class="navbar-brand mb-1">
       <a class="d-flex align-items-center text-decoration-none" href="/">
-        <img
-          src="/favicon.svg"
-          role="presentation"
-          alt="meSonic"
-          class="me-2"
-          width="30"
-          height="30"
-        />
+        <div class="me-1">
+          <img
+            src="/favicon.svg"
+            role="presentation"
+            alt="meSonic"
+            width="30"
+            height="30"
+          />
+        </div>
         <span>{heading}</span>
       </a>
     </h1>
-    <ul class="nav nav-tabs justify-content-end" style="margin-bottom: -1px;">
+    <ul class="nav nav-tabs justify-content-end">
       <li class="nav-item">
         <a
           href="/"

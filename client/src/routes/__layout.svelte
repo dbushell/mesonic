@@ -1,6 +1,6 @@
 <script context="module">
   import cookie from 'cookie';
-  import {browser} from '$app/env';
+  import {browser, prerendering} from '$app/env';
   import {
     fetchBookmarks,
     serverStore,
@@ -18,16 +18,16 @@
       serverStore.set(new URL(server));
     } else {
       proxyStore.set(null);
-      // Use internal Docker server-side if hosts match
-      if (!browser && session.internal) {
-        proxyStore.set(new URL(session.internal));
+      // Use internal proxy for SSR
+      if (!browser && session.proxy) {
+        proxyStore.set(new URL(session.proxy));
       }
       // Use default or cookie defined server
       serverStore.set(new URL(session.server));
     }
 
-    // Ensure all demo endpoints are rendered server-side
-    if (session.isStatic && !browser) {
+    // Ensure all demo endpoints are prerendered
+    if (prerendering) {
       await fetch('/demo/createBookmark.view');
       await fetch('/demo/deleteBookmark.view');
       await fetch('/demo/getScanStatus.view');
@@ -84,7 +84,12 @@
   let title = heading;
   $: {
     if ($songStore) {
-      title = `${heading} – ${$songStore.album}`;
+      const songName = $songStore.name;
+      const albumName = $songStore.album;
+      title = `${heading} – ${albumName}`;
+      if (songName !== albumName) {
+        title = `${title} – ${songName}`;
+      }
     }
   }
 </script>
@@ -98,7 +103,7 @@
   <div class="btn-toolbar mb-3">
     <div
       class="btn-group flex-grow-1"
-      aria-label="Browse categories"
+      aria-label="browse categories"
       role="toolbar"
     >
       <a

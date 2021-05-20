@@ -20,7 +20,7 @@
   font-style: normal;
 }
 :root {
-  --bs-font-sans-serif:Inter,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans","Liberation Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+  --bs-font-sans-serif: Inter, sans-serif;
 }
 .bi {
   width: 1em;
@@ -29,8 +29,17 @@
   vertical-align: -0.125em;
 }
 .container-fluid {
-  --bs-gutter-x: 3vw;
+  --bs-gutter-x: 3.5vw;
   max-width: 60rem;
+}
+.container-fluid.position-sticky {
+  z-index: 99;
+}
+.navbar-brand {
+  margin-inline-start: -0.25rem;
+}
+.nav-tabs {
+  margin-bottom: -1px;
 }
 .bs-popover-top > .popover-arrow::after {
   border-top-color: currentColor;
@@ -38,23 +47,14 @@
 .popover-body.fs-7 {
   font-weight: 600;
 }
-nav[aria-label='breadcrumb'] {
-  max-width: 100%;
+.spinner-border-sm {
+  width: 0.875rem;
+  height: 0.875rem;
+  border-width: 0.15rem;
 }
-.breadcrumb.text-nowrap .breadcrumb-item {
-  min-width: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.breadcrumb.text-nowrap .breadcrumb-item:not(:last-of-type) {
-  flex-shrink: 2;
-}
-.breadcrumb.text-nowrap .breadcrumb-item * {
-  display: contents;
-}
-.btn-toolbar .btn:not(.pe-none) {
-  z-index: 1;
+.btn-toolbar .btn.pe-none {
+  opacity: .65;
+  z-index: -1;
 }
 .fs-7 {
   font-size: 0.75rem !important;
@@ -68,15 +68,61 @@ nav[aria-label='breadcrumb'] {
 .flex-column > * {
   min-width: 0;
 }
-</style>
-<script>
-const {host} = window.location;
-if (!/(localhost|127\.0)/.test(host)) {
-  if ('serviceWorker' in window.navigator) {
-    window.navigator.serviceWorker.register('/sw.js');
+.player-toolbar p {
+  flex-basis: 25%;
+}
+.player-toolbar .btn-toolbar {
+  flex-basis: 50%;
+}
+.form-range {
+  --range-progess: calc((100% / (var(--range-max) + 0.01)) * var(--range-value));
+  --range-gradient1: linear-gradient(
+    to right,
+    transparent calc(var(--range-progess) / 3),
+    hsla(41, 91%, 50%, 0.3) var(--range-progess),
+    #343a40 var(--range-progess)
+  );
+}
+.form-range::-moz-range-track {
+  background-image: var(--range-gradient1);
+}
+.form-range::-webkit-slider-runnable-track {
+  background-image: var(--range-gradient1);
+}
+@keyframes atom {
+  to {
+    transform: rotate(360deg);
   }
 }
-</script>
+.form-range:active ~ .atom {
+  --atom-color: #fce6b6;
+}
+.atom {
+  --atom-color: #f4ab0b;
+  --atom-size: 1.5rem;
+  --atom-left: calc(((100% - 1rem) / var(--range-max)) * var(--range-value));
+  --atom-transform: translateX(calc(-50% + 0.5rem)) translateY(-50%);
+  height: var(--atom-size);
+  left: var(--atom-left);
+  position: absolute;
+  pointer-events: none;
+  top: 50%;
+  width: var(--atom-size);
+}
+.atom svg {
+  animation: atom 1s linear infinite;
+  display: block;
+  fill: var(--atom-color);
+  height: var(--atom-size);
+  width: var(--atom-size);
+}
+.atom:nth-last-child(1) {
+  transform: var(--atom-transform) rotateZ(45deg) scaleY(0.5);
+}
+.atom:nth-last-child(2) {
+  transform: var(--atom-transform) rotateZ(-45deg) scaleY(0.5);
+}
+</style>
 %svelte.head%
 </head>
 <body class="min-vh-100">

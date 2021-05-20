@@ -11,9 +11,8 @@
   disabled={isDisabled}
   on:click={() => dispatch('click')}
   type="button"
-  aria-label="Pause"
+  aria-label="pause"
   class="btn btn-outline-primary"
-  style="min-width: 3.5rem;"
 >
   <Pause />
 </button>

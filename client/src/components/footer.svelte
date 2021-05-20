@@ -4,15 +4,18 @@
   const year = new Date().getFullYear();
 </script>
 
-<footer class="container-fluid pb-5 mt-auto" aria-label="meSonic information">
-  <p class="fs-7 text-dark text-center m-0">
-    v0.14.1 &nbsp;|&nbsp; © {year}
-    <a href="https://dbushell.com/" class="text-dark" target="_blank">
+<footer
+  class="container-fluid text-center fs-7 pb-5 mt-auto"
+  aria-label="information"
+>
+  <p class="text-dark text-center d-inline-flex m-0">
+    <span>v0.14.2 &nbsp;|&nbsp; © {year}</span>
+    <a href="https://dbushell.com/" class="text-dark mx-2" target="_blank">
       David Bushell
     </a>
     <a
       href="https://github.com/dbushell/mesonic"
-      class="text-dark ms-2"
+      class="text-dark"
       target="_blank"
     >
       <GitHub />

@@ -15,6 +15,7 @@
   import ForwardButton from './forward.svelte';
   import PauseButton from './pause.svelte';
   import PlayButton from './play.svelte';
+  import Atom from './atom.svelte';
 
   let audio;
   let song;
@@ -82,13 +83,18 @@
 
   unsubscribe.push(
     songStore.subscribe(async (newSong) => {
-      if (newSong && !newSong.stream) {
+      if (!newSong) {
+        song = null;
+        resetAudio();
+        return;
+      }
+      if (!newSong.stream) {
         const url = await addServerParams(
           new URL(`/rest/stream.view?id=${newSong.id}`, $serverStore)
         );
         newSong.stream = url.href;
       }
-      if (song && newSong) {
+      if (song) {
         if (song.id !== newSong.id) {
           if (isPlaying) {
             setBookmark();
@@ -96,7 +102,7 @@
           song = newSong;
           resetAudio();
         }
-      } else if (newSong) {
+      } else {
         song = newSong;
         resetAudio();
       }
@@ -126,17 +132,18 @@
     rangeEnd = formatTime(rangeMax);
     audio.playbackRate = playbackRate;
     onLoadedPosition = 0;
-    bookmarks.find((bookmark) => {
-      const isFound = bookmark?.entry[0]?.id === song.id;
-      if (isFound) {
-        onLoadedPosition = bookmark.position;
+    const bookmarked = bookmarks.find((item) => {
+      if (item?.entry[0]?.id === song.id) {
+        onLoadedPosition = item.position;
         audio.currentTime = onLoadedPosition / 1000;
+        return true;
       }
-      return isFound;
     });
     if (song.autoplay) {
       song.autoplay = false;
-      audio.currentTime = 0;
+      if (!bookmarked) {
+        audio.currentTime = 0;
+      }
       audio.play();
     }
   };
@@ -197,18 +204,28 @@
       return (ev.returnValue = '...');
     }
   };
+
+  // Audio debug events
+  // on:suspend={(ev) => console.log(ev)}
+  // on:stalled={(ev) => console.log(ev)}
+  // on:waiting={(ev) => console.log(ev)}
+  // on:error={(ev) => console.log(ev)}
 </script>
 
 <svelte:window on:beforeunload|capture={onBeforeUnload} />
 <aside
-  class="container-fluid mt-0 mb-3 py-3 bg-white border-bottom"
-  style="position: sticky; top: 0; z-index: 99;"
+  class="container-fluid mt-0 mb-3 py-3 bg-white border-bottom position-sticky top-0"
 >
-  <div class="mb-2 d-flex flex-wrap align-items-center">
+  <div class="d-flex flex-wrap align-items-center mb-1">
     <h2 class="visually-hidden">Audio Player</h2>
     {#if song}
-      <p class="h6 lh-base m-0 me-auto">
-        {isLoaded ? '' : 'Loading: '}{song.title}
+      <p class="h6 lh-base d-flex align-items-center m-0 me-auto">
+        {#if !isLoaded}
+          <span role="status" class="spinner-border spinner-border-sm me-1">
+            <span class="visually-hidden">Loading…</span>
+          </span>
+        {/if}
+        <span>{song.title}</span>
       </p>
       <div class="d-flex flex-wrap">
         <a
@@ -228,10 +245,14 @@
       <p class="h6 lh-base m-0 text-dark">Not playing…</p>
     {/if}
   </div>
-  <div class="mb-2" style="position: relative;">
+  <div
+    class="position-relative mb-2"
+    style="--range-value: {rangeValue}; --range-max: {rangeMax};"
+  >
     <input
       type="range"
-      class="form-range"
+      class="form-range d-flex"
+      aria-label="progress"
       bind:value={rangeValue}
       on:change={onRangeChange}
       on:input={onRangeInput}
@@ -241,46 +262,50 @@
     {#if isSeeking}
       <div
         role="tooltip"
-        class="popover bs-popover-top bg-secondary text-secondary"
-        style="--range-value: {rangeValue}; --range-max: {rangeMax}; --offset: calc((100% - 1em) / var(--range-max) * var(--range-value)); pointer-events: none; position: absolute; bottom: 100%; top: auto; z-index: 1; left: var(--offset); transform: translateX(calc(-50% + 0.5em));"
+        class="popover bs-popover-top bg-secondary text-secondary border-secondary pe-none position-absolute bottom-100"
+        style="--offset: calc((100% - 1em) / var(--range-max) * var(--range-value)); top: auto; left: var(--offset); transform: translateX(calc(-50% + 0.5em));"
       >
         <div
-          class="popover-arrow"
-          style="position: absolute; transform: translateX(-50%); left: 50%; top: 100%;"
+          class="popover-arrow position-absolute top-100 start-50 translate-middle-x"
         />
         <div class="popover-body text-white fs-7 p-1 px-2">{rangeNow}</div>
       </div>
     {/if}
-    <div
-      aria-hidden={!isLoaded}
-      class="d-flex justify-content-between"
-      style="margin-top: -0.5rem;"
-    >
-      <p class="text-dark m-0">
-        <span class="visually-hidden">Current time</span>
-        <span class="fs-7 fw-light">{rangeStart}</span>
-      </p>
-      <p class="text-dark m-0">
-        <span class="visually-hidden">Duration</span>
-        <span class="fs-7 fw-light">-&thinsp;{rangeEnd}</span>
-      </p>
-    </div>
+    <Atom {isPlaying} />
+    <Atom {isPlaying} />
   </div>
-  <div class="btn-toolbar justify-content-center">
-    <div class="btn-group" role="toolbar" aria-label="Playback controls">
-      <RewindButton
-        isDisabled={!isLoaded}
-        on:click={() => (audio.currentTime -= 30)}
-      />
-      {#if isPlaying}
-        <PauseButton isDisabled={!isLoaded} on:click={() => audio.pause()} />
-      {:else}
-        <PlayButton isDisabled={!isLoaded} on:click={() => audio.play()} />
-      {/if}
-      <ForwardButton
-        isDisabled={!isLoaded}
-        on:click={() => (audio.currentTime += 30)}
-      />
+  <div
+    aria-hidden={!isLoaded}
+    class="d-flex justify-content-between align-items-center player-toolbar"
+  >
+    <p class="text-dark m-0 order-1">
+      <span class="visually-hidden">Current time</span>
+      <span class="fs-7 fw-light">{rangeStart}</span>
+    </p>
+    <p class="text-dark text-end m-0 order-3">
+      <span class="visually-hidden">Duration</span>
+      <span class="fs-7 fw-light">-&thinsp;{rangeEnd}</span>
+    </p>
+    <div class="btn-toolbar justify-content-center order-2">
+      <div
+        class="btn-group flex-grow-1"
+        aria-label="playback controls"
+        role="toolbar"
+      >
+        <RewindButton
+          isDisabled={!isLoaded}
+          on:click={() => (audio.currentTime -= 30)}
+        />
+        {#if isPlaying}
+          <PauseButton isDisabled={!isLoaded} on:click={() => audio.pause()} />
+        {:else}
+          <PlayButton isDisabled={!isLoaded} on:click={() => audio.play()} />
+        {/if}
+        <ForwardButton
+          isDisabled={!isLoaded}
+          on:click={() => (audio.currentTime += 30)}
+        />
+      </div>
     </div>
   </div>
   {#if song}
@@ -296,10 +321,6 @@
       on:loadedmetadata={onLoaded}
       on:canplay={onLoaded}
       on:canplaythrough={onLoaded}
-      on:suspend={(ev) => console.log(ev)}
-      on:stalled={(ev) => console.log(ev)}
-      on:waiting={(ev) => console.log(ev)}
-      on:error={(ev) => console.log(ev)}
       src={song.stream}
       preload="metadata"
       type="audio/mp3"

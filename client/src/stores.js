@@ -97,6 +97,7 @@ export const updateServer = async (server) => {
     const response = await fetch(url, props);
     const json = await response.json();
     if (json['subsonic-response'].status === 'ok') {
+      songStore.set(null);
       serverStore.set(new URL(server));
       return true;
     }

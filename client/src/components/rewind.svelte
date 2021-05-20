@@ -11,8 +11,8 @@
   disabled={isDisabled}
   on:click={() => dispatch('click')}
   type="button"
-  aria-label="Rewind 30 seconds"
-  class="btn btn-outline-primary"
+  aria-label="rewind 30 seconds"
+  class="btn btn-outline-primary text-nowrap"
 >
   <Rewind />
   <span

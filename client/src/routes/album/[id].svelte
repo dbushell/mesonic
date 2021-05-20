@@ -1,10 +1,10 @@
 <script context="module">
-  import {browser} from '$app/env';
+  import {prerendering} from '$app/env';
   import {fetchSongs} from '../../stores.js';
 
-  export const load = async ({fetch, page, session}) => {
+  export const load = async ({fetch, page}) => {
     const props = {id: page.params.id};
-    if (session.isStatic && !browser) {
+    if (prerendering) {
       props.fetch = fetch;
     }
     return {
@@ -53,8 +53,8 @@
   };
 </script>
 
+<h2 class="visually-hidden">Songs</h2>
 <div class="list-group">
-  <h2 class="visually-hidden">Songs</h2>
   {#if songs.length === 0}
     <div class="list-group-item text-danger border-danger">
       Failed to fetch songs
@@ -65,7 +65,7 @@
         on:click={onSong({...item})}
         type="button"
         class="list-group-item list-group-item-action d-flex flex-wrap justify-content-between align-items-center"
-        class:text-primary={song && song.id === item.id}
+        class:text-success={song && song.id === item.id}
       >
         <span>
           {#if song && song.id === item.id}<Headphones />{/if}
@@ -75,7 +75,7 @@
           {formatTime(item.duration)}
         </span>
         {#if item.progress}
-          <div class="progress w-100 mt-2 mb-1" style="height: 2px;">
+          <div class="progress w-100 mt-2 mb-1" style="height: 0.125rem;">
             <div
               class="progress-bar bg-success"
               role="progressbar"

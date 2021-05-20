@@ -1,10 +1,10 @@
 <script context="module">
-  import {browser} from '$app/env';
+  import {prerendering} from '$app/env';
   import {fetchArtists} from '../stores.js';
 
-  export const load = async ({fetch, session}) => {
+  export const load = async ({fetch}) => {
     const props = {};
-    if (session.isStatic && !browser) {
+    if (prerendering) {
       props.fetch = fetch;
     }
     return {
@@ -44,8 +44,8 @@
   );
 </script>
 
+<h2 class="visually-hidden">Artists</h2>
 <div class="list-group">
-  <h2 class="visually-hidden">Artists</h2>
   {#if artists.length === 0}
     <div class="list-group-item text-danger border-danger">
       Failed to fetch artists
@@ -55,7 +55,7 @@
       <a
         href="/artist/{item.id}"
         class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
-        class:text-primary={song && song.artistId === item.id}
+        class:text-success={song && song.artistId === item.id}
       >
         <span>
           {#if song && song.artistId === item.id}

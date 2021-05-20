@@ -1,8 +1,8 @@
-const ver = `0.14.1`;
-const cacheName = `svelte-${ver}`;
+import {build, timestamp} from '$service-worker';
 
-const preCache = [`/`];
-// const longCache = [`/bootstrap.min.css`, `/inter-variable.woff2`];
+const cacheName = `svelte-${timestamp}`;
+
+const preCache = ['/', ...build];
 
 self.addEventListener('install', (ev) => {
   console.log(`install`);
@@ -51,7 +51,7 @@ self.addEventListener('fetch', (ev) => {
     console.log(`bypass cache: ${url.pathname}`);
     return;
   }
-  if (/^\/(data|rest)\//.test(url.pathname)) {
+  if (/^\/(|\.svelte-kit|src|data|rest)\//.test(url.pathname)) {
     console.log(`bypass cache: ${url.pathname}`);
     return;
   }
