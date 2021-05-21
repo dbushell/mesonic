@@ -4,10 +4,11 @@ import * as path from 'path';
 import * as api from './api.js';
 import * as tasks from './tasks.js';
 import {getRequestData} from './utils.js';
+import {HEADERS} from './constants.js';
 
 await tasks.checkEnv();
 
-log.info('meSonic v0.14.2');
+log.info('meSonic v0.14.3');
 
 // Return the version
 if (Deno.args.includes('--version')) {
@@ -25,63 +26,67 @@ if (Deno.args.includes('--no-sync')) {
 }
 
 // Return response body JSON (or `Response`) for REST API requests
-const getResponse = async (url, request) => {
-  if (url.pathname === '/rest/test.view') {
+const getResponse = async (request) => {
+  if (!['POST', 'GET'].includes(request.method)) {
+    return;
+  }
+  const {pathname} = new URL(request.url);
+  if (pathname === '/rest/test.view') {
     const data = {};
     for (const pair of await getRequestData(request)) {
       data[pair[0]] = pair[1];
     }
     return {data};
   }
-  if (url.pathname === '/rest/ping.view') {
+  if (pathname === '/rest/ping.view') {
     return {};
   }
-  if (url.pathname === '/rest/getLicense.view') {
+  if (pathname === '/rest/getLicense.view') {
     return {license: {valid: true}};
   }
-  if (url.pathname === '/rest/startScan.view') {
+  if (pathname === '/rest/startScan.view') {
     return await api.startScan();
   }
-  if (url.pathname === '/rest/getScanStatus.view') {
+  if (pathname === '/rest/getScanStatus.view') {
     return await api.getScanStatus();
   }
-  if (url.pathname === '/rest/getGenres.view') {
+  if (pathname === '/rest/getGenres.view') {
     return await api.getGenres();
   }
-  if (url.pathname === '/rest/getPlaylists.view') {
+  if (pathname === '/rest/getPlaylists.view') {
     return await api.getPlaylists();
   }
-  if (url.pathname === '/rest/getPodcasts.view') {
+  if (pathname === '/rest/getPodcasts.view') {
     return await api.getPodcasts();
   }
-  if (url.pathname === '/rest/getUser.view') {
+  if (pathname === '/rest/getUser.view') {
     return await api.getUser();
   }
-  if (url.pathname === '/rest/getMusicFolders.view') {
+  if (pathname === '/rest/getMusicFolders.view') {
     return await api.getMusicFolders();
   }
-  if (url.pathname === '/rest/getMusicDirectory.view') {
+  if (pathname === '/rest/getMusicDirectory.view') {
     return await api.getMusicDirectory();
   }
-  if (url.pathname === '/rest/getIndexes.view') {
+  if (pathname === '/rest/getIndexes.view') {
     return await api.getIndexes();
   }
-  if (url.pathname === '/rest/getArtistInfo.view') {
+  if (pathname === '/rest/getArtistInfo.view') {
     return await api.getArtistInfo();
   }
-  if (url.pathname === '/rest/getArtistInfo2.view') {
+  if (pathname === '/rest/getArtistInfo2.view') {
     return await api.getArtistInfo2();
   }
-  if (url.pathname === '/rest/getAlbumList.view') {
+  if (pathname === '/rest/getAlbumList.view') {
     return await api.getAlbumList();
   }
-  if (url.pathname === '/rest/getAlbumList2.view') {
+  if (pathname === '/rest/getAlbumList2.view') {
     return await api.getAlbumList2();
   }
-  if (url.pathname === '/rest/getBookmarks.view') {
+  if (pathname === '/rest/getBookmarks.view') {
     return await api.getBookmarks();
   }
-  if (url.pathname === '/rest/createBookmark.view') {
+  if (pathname === '/rest/createBookmark.view') {
     try {
       const form = await getRequestData(request);
       await api.createBookmark(
@@ -94,7 +99,7 @@ const getResponse = async (url, request) => {
       log.warning(err);
     }
   }
-  if (url.pathname === '/rest/deleteBookmark.view') {
+  if (pathname === '/rest/deleteBookmark.view') {
     try {
       const form = await getRequestData(request);
       await api.deleteBookmark(form.get('id'));
@@ -103,10 +108,10 @@ const getResponse = async (url, request) => {
       log.error(err);
     }
   }
-  if (url.pathname === '/rest/getArtists.view') {
+  if (pathname === '/rest/getArtists.view') {
     return await api.getArtists();
   }
-  if (url.pathname === '/rest/getArtist.view') {
+  if (pathname === '/rest/getArtist.view') {
     try {
       const form = await getRequestData(request);
       return await api.getArtist(form.get('id'));
@@ -118,7 +123,7 @@ const getResponse = async (url, request) => {
       };
     }
   }
-  if (url.pathname === '/rest/getAlbum.view') {
+  if (pathname === '/rest/getAlbum.view') {
     try {
       const form = await getRequestData(request);
       return await api.getAlbum(form.get('id'));
@@ -130,7 +135,7 @@ const getResponse = async (url, request) => {
       };
     }
   }
-  if (url.pathname === '/rest/getSong.view') {
+  if (pathname === '/rest/getSong.view') {
     try {
       const form = await getRequestData(request);
       return await api.getSong(form.get('id'));
@@ -142,7 +147,8 @@ const getResponse = async (url, request) => {
       };
     }
   }
-  if (url.pathname === '/rest/stream.view') {
+  // Redirect stream to be handled by Caddy server
+  if (pathname === '/rest/stream.view') {
     try {
       const form = await getRequestData(request);
       const {song} = await api.getSong(form.get('id'), true);
@@ -160,53 +166,41 @@ const getResponse = async (url, request) => {
       };
     }
   }
+  // Default unknown request error
   return {
     status: 'failed',
     error: {code: 0, message: 'API request not supported'}
   };
 };
 
+// Handle HTTP server connections
 const onConn = async (conn) => {
   const httpConn = Deno.serveHttp(conn);
-  for await (const requestEvent of httpConn) {
-    const {request, respondWith} = requestEvent;
-    const url = new URL(request.url);
-    let {method} = request;
-    if (
-      method === 'POST' &&
-      request.headers.get('content-type') === 'application/json'
-    ) {
-      method = 'JSON';
-    }
-    log.debug(`${method} ${url}`);
-    let body;
-    if (['POST', 'GET'].includes(request.method)) {
-      body = await getResponse(url, request);
-    }
+  for await (const {request, respondWith} of httpConn) {
+    const type = request.headers.get('content-type')?.match(/[\w]+\/([\w-]+)/);
+    log.debug(`${request.method}${type ? ` [${type[1]}]` : ''} ${request.url}`);
+    // Get JSON response or immediately return
+    const body = await getResponse(request);
     if (body instanceof Response) {
       respondWith(body);
       continue;
     }
     // Wrap body is Subsonic response
-    body = {
-      'subsonic-response': {
-        status: 'ok',
-        version: '1.16.0',
-        ...body
-      }
-    };
     respondWith(
-      new Response(JSON.stringify(body), {
-        status: 200,
-        headers: {
-          'access-control-allow-headers':
-            'accept, accept-encoding, content-type, content-length, range',
-          'access-control-allow-methods': 'POST, GET, HEAD, OPTIONS',
-          'access-control-allow-origin': '*',
-          'content-type': 'application/json'
+      new Response(
+        JSON.stringify({
+          'subsonic-response': {
+            status: 'ok',
+            version: '1.16.0',
+            ...body
+          }
+        }),
+        {
+          status: 200,
+          headers: HEADERS
         }
-      })
-    );
+      )
+    ).catch(log.error);
   }
 };
 
@@ -218,9 +212,5 @@ log.info(`Client: http://localhost:3000`);
 log.info(`Proxy:  http://localhost:4040`);
 
 for await (const conn of server) {
-  try {
-    onConn(conn);
-  } catch (err) {
-    log.critical(err);
-  }
+  onConn(conn).catch(log.error);
 }

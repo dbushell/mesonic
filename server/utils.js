@@ -14,16 +14,13 @@ export const naturalSort = (item, key = 'name') =>
 export const getRequestData = async (request) => {
   try {
     if (request.method === 'GET') {
-      return new URL(request.url).searchParams;
+      return new Map(new URL(request.url).searchParams.entries());
     }
     if (request.headers.get('content-type') === 'application/json') {
-      const json = await request.json();
-      const data = new FormData();
-      Object.keys(json).forEach((key) => data.append(key, json[key]));
-      return data;
+      return new Map(Object.entries(await request.json()));
     }
     if (request.method === 'POST') {
-      return await request.formData();
+      return new Map((await request.formData()).entries());
     }
   } catch (err) {
     log.error(err);

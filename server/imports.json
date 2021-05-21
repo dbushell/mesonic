@@ -1,8 +1,8 @@
 {
   "imports": {
-    "log": "https://deno.land/std@0.96.0/log/mod.ts",
-    "csv": "https://deno.land/std@0.96.0/encoding/csv.ts",
-    "path": "https://deno.land/std@0.96.0/path/mod.ts",
-    "printf": "https://deno.land/std@0.96.0/fmt/printf.ts"
+    "log": "https://deno.land/std@0.97.0/log/mod.ts",
+    "csv": "https://deno.land/std@0.97.0/encoding/csv.ts",
+    "path": "https://deno.land/std@0.97.0/path/mod.ts",
+    "printf": "https://deno.land/std@0.97.0/fmt/printf.ts"
   }
 }

@@ -1,4 +1,5 @@
 #!/bin/zsh
+source ~/.zshrc
 
 deno run --unstable --allow-all --import-map ~/server/imports.json ~/server/mod.js & ;
 
