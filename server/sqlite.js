@@ -2,7 +2,7 @@
 import * as log from 'log';
 import * as csv from 'csv';
 import {Queue, sqlf} from './utils.js';
-import {DATABASE} from './constants.js';
+import {DEV, DATABASE} from './constants.js';
 
 // Limit queries to avoid locked database
 const queries = new Queue();
@@ -10,6 +10,9 @@ const queries = new Queue();
 // Return CSV formatted data from an SQLite query
 export const runQuery = async (sql, args = {readonly: true, header: true}) => {
   return queries.push(async () => {
+    if (DEV) {
+      log.info(sql.replace(/\s+/g, ' '));
+    }
     const cmd = ['sqlite3'];
     if (args.readonly !== false) {
       cmd.push('-readonly');
@@ -61,17 +64,19 @@ const parseOptions = {
 };
 
 // Query and parse `artists` table
-export const getArtists = async () => {
+export const getArtists = async (artist_id = 0) => {
   try {
-    const data = new TextDecoder().decode(
-      await runQuery(
-        'SELECT `artists`.*,\
-        (SELECT COUNT(*) FROM `albums` WHERE `artist_id`=`artists`.`id`) AS `album_count`,\
-        (SELECT COUNT(*) FROM `songs` WHERE `artist_id`=`artists`.`id`) AS `song_count`\
-        FROM `artists`\
-        ORDER BY `artists`.`name` ASC'
-      )
-    );
+    let query =
+      'SELECT `artists`.*,\
+      (SELECT COUNT(*) FROM `albums` WHERE `artist_id`=`artists`.`id`) AS `album_count`,\
+      (SELECT COUNT(*) FROM `songs` WHERE `artist_id`=`artists`.`id`) AS `song_count`\
+      FROM `artists`';
+    if (artist_id) {
+      query += sqlf(' WHERE `artists`.`id`=%d LIMIT 1', artist_id);
+    } else {
+      query += ' ORDER BY `artists`.`name` ASC';
+    }
+    const data = new TextDecoder().decode(await runQuery(query));
     if (!data.trim()) {
       return [];
     }
@@ -83,11 +88,15 @@ export const getArtists = async () => {
 };
 
 // Get single artist data
-// TODO: improve efficiency
-export const getArtistByKeyValue = (key, value) =>
-  getArtists().then((artists) =>
-    artists.find((artist) => artist[key] === value)
-  );
+export const getArtistByKeyValue = async (key, value) => {
+  let artists = [];
+  if (key === 'id') {
+    artists = await getArtists(value);
+  } else {
+    artists = await getArtists();
+  }
+  return artists.find((artist) => artist[key] === value);
+};
 
 // Update artist data
 export const updateArtist = (data) =>
@@ -118,21 +127,27 @@ export const insertArtist = (data) =>
   );
 
 // Delete artist data
-export const deleteArtist = (artist_id) =>
-  execQuery(sqlf('DELETE FROM `artists` WHERE `id`=%d LIMIT 1', artist_id));
+export const deleteArtist = async ({id, path}) => {
+  log.warning(`Removing artist: ${path}`);
+  await execQuery(sqlf('DELETE FROM `artists` WHERE `id`=%d LIMIT 1', id));
+};
 
 // Query and parse `albums` table
-export const getAlbums = async (artist_id = 0) => {
+export const getAlbums = async (artist_id = 0, album_id = 0) => {
   try {
     let query =
       'SELECT `albums`.*,\
        (SELECT COUNT(*) FROM `songs` WHERE `album_id`=`albums`.`id`) AS `song_count`,\
        (SELECT SUM(`duration`) FROM `songs` WHERE `album_id`=`albums`.`id`) AS `duration`\
        FROM `albums`';
-    if (artist_id) {
+    if (album_id) {
+      query += sqlf(' WHERE `albums`.`id`=%d LIMIT 1', album_id);
+    } else if (artist_id) {
       query += sqlf(' WHERE `albums`.`artist_id`=%d', artist_id);
     }
-    query += ' ORDER BY `albums`.`name` ASC';
+    if (!album_id) {
+      query += ' ORDER BY `albums`.`name` ASC';
+    }
     const data = new TextDecoder().decode(await runQuery(query));
     if (!data.trim()) {
       return [];
@@ -145,11 +160,15 @@ export const getAlbums = async (artist_id = 0) => {
 };
 
 // Get single album data
-// TODO: improve efficiency
-export const getAlbumByKeyValue = (key, value, artist_id = 0) =>
-  getAlbums(artist_id).then((albums) =>
-    albums.find((album) => album[key] === value)
-  );
+export const getAlbumByKeyValue = async (key, value, artist_id = 0) => {
+  let albums = [];
+  if (key === 'id') {
+    albums = await getAlbums(0, value);
+  } else {
+    albums = await getAlbums(artist_id);
+  }
+  return albums.find((album) => album[key] === value);
+};
 
 // Update album data
 export const updateAlbum = (data) =>
@@ -182,8 +201,10 @@ export const insertAlbum = (data) =>
   );
 
 // Delete album data
-export const deleteAlbum = (album_id) =>
-  execQuery(sqlf('DELETE FROM `albums` WHERE `id`=%d LIMIT 1', album_id));
+export const deleteAlbum = async ({id, path}) => {
+  log.warning(`Removing album: ${path}`);
+  await execQuery(sqlf('DELETE FROM `albums` WHERE `id`=%d LIMIT 1', id));
+};
 
 export const countSongs = async () => {
   try {
@@ -200,21 +221,25 @@ export const countSongs = async () => {
 };
 
 // Query and parse `songs` table
-export const getSongs = async (artist_id = 0, album_id = 0) => {
+export const getSongs = async (artist_id = 0, album_id = 0, song_id = 0) => {
   try {
     let query = 'SELECT * FROM `songs`';
-    if (artist_id && album_id) {
-      query = sqlf(
-        query + ' WHERE `artist_id`=%d AND `album_id`=%d',
+    if (song_id) {
+      query += sqlf(' WHERE `id`=%d LIMIT 1', song_id);
+    } else if (artist_id && album_id) {
+      query += sqlf(
+        ' WHERE `artist_id`=%d AND `album_id`=%d',
         artist_id,
         album_id
       );
     } else if (artist_id) {
-      query = sqlf(query + ' WHERE `artist_id`=%d', artist_id);
+      query += sqlf(' WHERE `artist_id`=%d', artist_id);
     } else if (album_id) {
-      query = sqlf(query + ' WHERE `album_id`=%d', album_id);
+      query += sqlf(' WHERE `album_id`=%d', album_id);
     }
-    query += ' ORDER BY `songs`.`name` ASC';
+    if (!song_id) {
+      query += ' ORDER BY `songs`.`name` ASC';
+    }
     const data = new TextDecoder().decode(await runQuery(query));
     if (!data.trim()) {
       return [];
@@ -227,11 +252,20 @@ export const getSongs = async (artist_id = 0, album_id = 0) => {
 };
 
 // Get single song data
-// TODO: improve efficiency
-export const getSongByKeyValue = (key, value, artist_id = 0, album_id = 0) =>
-  getSongs(artist_id, album_id).then((songs) =>
-    songs.find((song) => song[key] === value)
-  );
+export const getSongByKeyValue = async (
+  key,
+  value,
+  artist_id = 0,
+  album_id = 0
+) => {
+  let songs = [];
+  if (key === 'id') {
+    songs = await getSongs(0, 0, value);
+  } else {
+    songs = await getSongs(artist_id, album_id);
+  }
+  return songs.find((song) => song[key] === value);
+};
 
 // Update song data
 export const updateSong = (data) =>
@@ -282,8 +316,10 @@ export const insertSong = (data) =>
   );
 
 // Delete song data
-export const deleteSong = (song_id) =>
-  execQuery(sqlf('DELETE FROM `songs` WHERE `id`=%d LIMIT 1', song_id));
+export const deleteSong = async ({id, path}) => {
+  log.warning(`Removing song: ${path}`);
+  await execQuery(sqlf('DELETE FROM `songs` WHERE `id`=%d LIMIT 1', id));
+};
 
 // Query and parse `bookmarks` table
 export const getBookmarks = async () => {
@@ -307,7 +343,6 @@ export const getBookmarks = async () => {
 };
 
 // Get single bookmark data
-// TODO: improve efficiency
 export const getBookmarkByKeyValue = (key, value) =>
   getBookmarks().then((bookmarks) =>
     bookmarks.find((bookmark) => bookmark[key] === value)
@@ -344,15 +379,11 @@ export const insertBookmark = (data) =>
   );
 
 // Delete bookmark data
-export const deleteBookmark = (bookmark_id, is_song = false) => {
+export const deleteBookmark = async (id, is_song = false) => {
   if (is_song) {
-    return execQuery(
-      sqlf('DELETE FROM `bookmarks` WHERE `song_id`=%d', bookmark_id)
-    );
+    await execQuery(sqlf('DELETE FROM `bookmarks` WHERE `song_id`=%d', id));
   } else {
-    return execQuery(
-      sqlf('DELETE FROM `bookmarks` WHERE `id`=%d LIMIT 1', bookmark_id)
-    );
+    await execQuery(sqlf('DELETE FROM `bookmarks` WHERE `id`=%d LIMIT 1', id));
   }
 };
 

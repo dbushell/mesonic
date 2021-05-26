@@ -1,6 +1,6 @@
 <script context="module">
   import {prerendering} from '$app/env';
-  import {fetchSongs} from '../../stores.js';
+  import {fetchSongs} from '../stores.js';
 
   export const load = async ({fetch, page}) => {
     const props = {id: page.params.id};
@@ -17,9 +17,9 @@
 
 <script>
   import {onDestroy} from 'svelte';
-  import {songStore, bookmarkStore} from '../../stores.js';
-  import {formatTime} from '../../utils.js';
-  import Headphones from '../../icons/headphones.svelte';
+  import {songStore, bookmarkStore} from '../stores.js';
+  import {formatTime} from '../utils.js';
+  import Headphones from '../icons/headphones.svelte';
 
   export let songs = [];
 

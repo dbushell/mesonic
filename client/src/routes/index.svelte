@@ -53,7 +53,7 @@
   {:else}
     {#each artists as item (item.id)}
       <a
-        href="/artist/{item.id}"
+        href="/{item.id}"
         class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
         class:text-success={song && song.artistId === item.id}
       >

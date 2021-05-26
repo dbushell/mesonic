@@ -1,6 +1,9 @@
 // Constants
 import * as path from 'path';
 
+// Development mode
+export const DEV = Number(Deno.env.get('MESONIC_DEV')) === 1;
+
 // Directory path to sync audio (read-only)
 export const MEDIA = path.resolve(Deno.env.get('MESONIC_MEDIA'));
 

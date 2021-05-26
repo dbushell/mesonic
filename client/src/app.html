@@ -40,6 +40,7 @@
 }
 .nav-tabs {
   margin-bottom: -1px;
+  margin-inline-end: -0.25rem;
 }
 .bs-popover-top > .popover-arrow::after {
   border-top-color: currentColor;
@@ -75,13 +76,20 @@
   flex-basis: 50%;
 }
 .form-range {
+  --range-color: var(--bs-primary);
   --range-progess: calc((100% / (var(--range-max) + 0.01)) * var(--range-value));
   --range-gradient1: linear-gradient(
     to right,
-    transparent calc(var(--range-progess) / 3),
-    hsla(41, 91%, 50%, 0.3) var(--range-progess),
+    transparent calc(var(--range-progess) / 4),
+    hsla(41, 91%, 50%, 0.5) var(--range-progess),
     #343a40 var(--range-progess)
   );
+}
+.form-range::-moz-range-thumb {
+  background-color: var(--range-color);
+}
+.form-range::-webkit-slider-thumb {
+  background-color: var(--range-color);
 }
 .form-range::-moz-range-track {
   background-image: var(--range-gradient1);

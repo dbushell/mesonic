@@ -229,13 +229,13 @@
       </p>
       <div class="d-flex flex-wrap">
         <a
-          href={`/artist/${song.artistId}`}
+          href={`/${song.artistId}`}
           class="btn btn-link text-dark p-0 fs-7 fw-normal me-2"
         >
           {song.artist}
         </a>
         <a
-          href={`/album/${song.albumId}`}
+          href={`/${song.albumId}`}
           class="btn btn-link text-dark p-0 fs-7 fw-normal"
         >
           {song.album}
@@ -251,7 +251,7 @@
   >
     <input
       type="range"
-      class="form-range d-flex"
+      class="form-range d-block"
       aria-label="progress"
       bind:value={rangeValue}
       on:change={onRangeChange}

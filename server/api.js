@@ -13,16 +13,17 @@ export const songData = (song, artist, album, include_path = false) => {
     id: song.id,
     name: song.name,
     title: song.name,
-    artistId: artist.id,
+    artistId: `artist-${artist.id}`,
     artist: artist.name,
-    albumId: album.id,
+    albumId: `album-${album.id}`,
     album: album.name,
-    parent: album.id,
+    parent: `album-${album.id}`,
     created: new Date(song.created_at).toISOString(),
     duration: Math.round(song.duration / 1000),
     bitrate: Math.round(song.bitrate / 1000),
     size: song.size,
-    suffix: parse_path.ext.substring(1)
+    suffix: parse_path.ext.substring(1),
+    type: 'audiobook'
   };
   switch (value.suffix) {
     case 'm4b':
@@ -40,12 +41,12 @@ export const songData = (song, artist, album, include_path = false) => {
 export const albumData = (album, artist, songs = false) => {
   const value = {
     isDir: true,
-    id: album.id,
+    id: `album-${album.id}`,
     name: album.name,
     title: album.name,
-    artistId: artist.id,
+    artistId: `artist-${artist.id}`,
     artist: artist.name,
-    parent: artist.id,
+    parent: `artist-${artist.id}`,
     created: new Date(album.created_at).toISOString(),
     songCount: album.song_count,
     duration: Math.round(album.duration / 1000)
@@ -58,7 +59,7 @@ export const albumData = (album, artist, songs = false) => {
 
 export const artistData = (artist, albums = false) => {
   const value = {
-    id: artist.id,
+    id: `artist-${artist.id}`,
     name: artist.name,
     title: artist.name,
     albumCount: artist.album_count
@@ -153,8 +154,7 @@ export const getBookmarks = async () => {
         };
         list.splice(i, 0, value);
       } catch (err) {
-        log.error(err);
-        return;
+        deleteBookmark(bookmark.song_id, true);
       }
     })
   );
@@ -196,13 +196,46 @@ export const getUser = async () => {
   };
 };
 
-export const getIndexes = async () => ({
-  indexes: {lastModified: 0, ignoredArticles: '', index: []}
-});
+export const getIndexes = async () => {
+  const {
+    artists: {index}
+  } = await getArtists();
+  return {
+    indexes: {
+      lastModified: 0,
+      ignoredArticles: '',
+      index
+    }
+  };
+};
+
+export const getMusicDirectory = async (dir_id) => {
+  const [, type, id] = String(dir_id).match(/^(\w+)-(\d+)$/);
+  if (type === 'artist') {
+    const {artist} = await getArtist(id);
+    return {
+      directory: {
+        id: dir_id,
+        name: artist.name,
+        child: artist.album
+      }
+    };
+  }
+  if (type === 'album') {
+    const {album} = await getAlbum(id);
+    return {
+      directory: {
+        id: dir_id,
+        name: album.name,
+        parent: album.artistId,
+        child: album.song
+      }
+    };
+  }
+  throw new Error();
+};
 
 export const getMusicFolders = async () => ({musicFolders: {musicFolder: []}});
-
-export const getMusicDirectory = async () => ({directory: {child: []}});
 
 export const getGenres = async () => ({genres: {genres: []}});
 

@@ -8,8 +8,8 @@
   class="container-fluid text-center fs-7 pb-5 mt-auto"
   aria-label="information"
 >
-  <p class="text-dark text-center d-inline-flex m-0">
-    <span>v0.14.3 &nbsp;|&nbsp; © {year}</span>
+  <p class="text-dark text-center text-nowrap d-inline-flex m-0">
+    <span>v0.14.7 &nbsp;|&nbsp; © {year}</span>
     <a href="https://dbushell.com/" class="text-dark mx-2" target="_blank">
       David Bushell
     </a>

@@ -1,5 +1,5 @@
 <script>
-  import { goto } from '$app/navigation';
+  import {goto} from '$app/navigation';
   import {onDestroy} from 'svelte';
   import {
     authStore,
@@ -10,8 +10,7 @@
     getScanStatus
   } from '../stores.js';
 
-  const rates = ['1.0', '1.2', '1.4', '1.6', '1.8', '2.0'];
-  let rate = '1.0';
+  let rate;
   let isError = false;
   let scan = {};
   const unsubscribe = [];
@@ -37,8 +36,11 @@
     getScanStatus();
   };
 
-  const onRateChange = (rate) => {
-    playbackStore.set({...$playbackStore, rate});
+  const onRateChange = (ev) => {
+    playbackStore.set({
+      ...$playbackStore,
+      rate: String(ev.target.value).padEnd(3, '.0')
+    });
   };
 
   const onSettings = async (ev) => {
@@ -59,24 +61,37 @@
   };
 </script>
 
-<div class="pt-2 mb-4">
-  <p class="mb-2" id="playback-rate">Playback rate</p>
-  <div class="btn-group d-flex" role="toolbar" aria-labelledby="playback-rate">
-    {#each rates as item}
-      <button
-        type="button"
-        on:click={() => onRateChange(item)}
-        class="btn"
-        class:btn-outline-secondary={item !== rate}
-        class:btn-secondary={item === rate}
-        aria-selected={item === rate}
-      >
-        {item}
-      </button>
-    {/each}
+<div class="pt-2">
+  <p class="mb-1" id="playback-rate">Playback rate</p>
+  <div
+    class="d-flex justify-content-between align-items-center"
+    aria-hidden="true"
+  >
+    <p class="text-dark m-0">
+      <span class="fs-7 fw-light">1.0</span>
+    </p>
+    <p class="m-0 fs-6 text-success d-inline-flex align-items-center">
+      <span class="ms-1">{rate}</span>
+      <span>&times;</span>
+    </p>
+    <p class="text-dark text-end m-0 ">
+      <span class="fs-7 fw-light">2.0</span>
+    </p>
   </div>
+  <input
+    type="range"
+    class="form-range d-block text-success"
+    style="--range-color: var(--bs-green);"
+    aria-labelledby="playback-rate"
+    max="2"
+    min="1"
+    step="0.1"
+    value={rate}
+    on:change={onRateChange}
+    on:input={onRateChange}
+  />
 </div>
-<form method="POST" on:submit={onSettings}>
+<form on:submit={onSettings} method="POST" class="mt-4 pt-4 border-top">
   <div class="mb-3">
     <label
       for="server"

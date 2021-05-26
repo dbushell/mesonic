@@ -13,7 +13,7 @@ export const get = async () => {
               name: 'M',
               artist: [
                 {
-                  id: 1,
+                  id: 'artist-1',
                   name: 'Herman Melville',
                   title: 'Herman Melville',
                   albumCount: 1

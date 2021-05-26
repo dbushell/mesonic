@@ -1,6 +1,6 @@
 <script context="module">
   import {prerendering} from '$app/env';
-  import {fetchAlbums} from '../../stores.js';
+  import {fetchAlbums} from '../stores.js';
 
   export const load = async ({fetch, page}) => {
     const props = {id: page.params.id};
@@ -17,10 +17,10 @@
 
 <script>
   import {onDestroy} from 'svelte';
-  import {albumStore, songStore} from '../../stores.js';
-  import {formatTime} from '../../utils.js';
-  import Headphones from '../../icons/headphones.svelte';
-  import Folder from '../../icons/folder.svelte';
+  import {albumStore, songStore} from '../stores.js';
+  import {formatTime} from '../utils.js';
+  import Headphones from '../icons/headphones.svelte';
+  import Folder from '../icons/folder.svelte';
 
   export let albums = [];
 
@@ -54,7 +54,7 @@
   {:else}
     {#each albums as item (item.id)}
       <a
-        href="/album/{item.id}"
+        href="/{item.id}"
         class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
         class:text-success={song && song.albumId === item.id}
       >

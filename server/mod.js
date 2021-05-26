@@ -8,7 +8,7 @@ import {HEADERS} from './constants.js';
 
 await tasks.checkEnv();
 
-log.info('meSonic v0.14.3');
+log.info('meSonic v0.14.7');
 
 // Return the version
 if (Deno.args.includes('--version')) {
@@ -65,12 +65,6 @@ const getResponse = async (request) => {
   if (pathname === '/rest/getMusicFolders.view') {
     return await api.getMusicFolders();
   }
-  if (pathname === '/rest/getMusicDirectory.view') {
-    return await api.getMusicDirectory();
-  }
-  if (pathname === '/rest/getIndexes.view') {
-    return await api.getIndexes();
-  }
   if (pathname === '/rest/getArtistInfo.view') {
     return await api.getArtistInfo();
   }
@@ -82,6 +76,21 @@ const getResponse = async (request) => {
   }
   if (pathname === '/rest/getAlbumList2.view') {
     return await api.getAlbumList2();
+  }
+  if (pathname === '/rest/getIndexes.view') {
+    return await api.getIndexes();
+  }
+  if (pathname === '/rest/getMusicDirectory.view') {
+    try {
+      const form = await getRequestData(request);
+      return await api.getMusicDirectory(form.get('id'));
+    } catch (err) {
+      log.warning(err);
+      return {
+        status: 'failed',
+        error: {code: 70, message: 'Directory not found'}
+      };
+    }
   }
   if (pathname === '/rest/getBookmarks.view') {
     return await api.getBookmarks();
@@ -114,7 +123,7 @@ const getResponse = async (request) => {
   if (pathname === '/rest/getArtist.view') {
     try {
       const form = await getRequestData(request);
-      return await api.getArtist(form.get('id'));
+      return await api.getArtist(form.get('id').replace(/[^\d]/g, ''));
     } catch (err) {
       log.warning(err);
       return {
@@ -126,7 +135,7 @@ const getResponse = async (request) => {
   if (pathname === '/rest/getAlbum.view') {
     try {
       const form = await getRequestData(request);
-      return await api.getAlbum(form.get('id'));
+      return await api.getAlbum(form.get('id').replace(/[^\d]/g, ''));
     } catch (err) {
       log.warning(err);
       return {

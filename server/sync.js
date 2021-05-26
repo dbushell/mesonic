@@ -128,7 +128,7 @@ export const syncData = async () => {
             await sqlite.updateSongMeta({...song, ...meta});
           } else {
             log.warning(`Failed to sync: ${song.path}`);
-            await sqlite.deleteSong(song.id);
+            await sqlite.deleteSong(song);
           }
         }
       }
@@ -143,8 +143,7 @@ export const syncData = async () => {
         throw new Error();
       }
     } catch (err) {
-      log.warning(`Removing artist: ${artist.path}`);
-      await sqlite.deleteArtist(artist.id);
+      await sqlite.deleteArtist(artist);
     }
   }
 
@@ -156,8 +155,7 @@ export const syncData = async () => {
         throw new Error();
       }
     } catch (err) {
-      log.warning(`Removing album: ${album.path}`);
-      await sqlite.deleteAlbum(album.id);
+      await sqlite.deleteAlbum(album);
     }
   }
 
@@ -169,8 +167,7 @@ export const syncData = async () => {
         throw new Error();
       }
     } catch (err) {
-      log.warning(`Removing song: ${song.path}`);
-      await sqlite.deleteSong(song.id);
+      await sqlite.deleteSong(song);
     }
   }
 
