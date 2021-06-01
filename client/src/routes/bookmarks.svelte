@@ -50,8 +50,8 @@
       <article
         class="list-group-item d-flex flex-wrap justify-content-between align-items-center"
       >
-        <h3 class="my-1 mb-1 lh-base h6 d-flex align-items-center">
-          <span class="badge bg-light text-dark me-2">
+        <h3 class="my-1 mb-1 h6 lh-base align-items-center">
+          <span class="badge bg-light text-dark font-monospace align-text-top me-1">
             {formatTime(item.position / 1000)}
           </span>
           <span>{item.entry[0].title}</span>

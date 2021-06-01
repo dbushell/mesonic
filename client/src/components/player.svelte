@@ -268,7 +268,7 @@
         <div
           class="popover-arrow position-absolute top-100 start-50 translate-middle-x"
         />
-        <div class="popover-body text-white fs-7 p-1 px-2">{rangeNow}</div>
+        <div class="popover-body text-white font-monospace fs-7 p-1 px-2">{rangeNow}</div>
       </div>
     {/if}
     <Atom {isPlaying} />
@@ -280,11 +280,11 @@
   >
     <p class="text-dark m-0 order-1">
       <span class="visually-hidden">Current time</span>
-      <span class="fs-7 fw-light">{rangeStart}</span>
+      <span class="fs-7 fw-light font-monospace">{rangeStart}</span>
     </p>
     <p class="text-dark text-end m-0 order-3">
       <span class="visually-hidden">Duration</span>
-      <span class="fs-7 fw-light">-&thinsp;{rangeEnd}</span>
+      <span class="fs-7 fw-light font-monospace">-{rangeEnd}</span>
     </p>
     <div class="btn-toolbar justify-content-center order-2">
       <div

@@ -68,14 +68,14 @@
     aria-hidden="true"
   >
     <p class="text-dark m-0">
-      <span class="fs-7 fw-light">1.0</span>
+      <span class="fs-7 fw-light font-monospace">1.0</span>
     </p>
     <p class="m-0 fs-6 text-success d-inline-flex align-items-center">
-      <span class="ms-1">{rate}</span>
+      <span class="ms-1 font-monospace">{rate}</span>
       <span>&times;</span>
     </p>
     <p class="text-dark text-end m-0 ">
-      <span class="fs-7 fw-light">2.0</span>
+      <span class="fs-7 fw-light font-monospace">2.0</span>
     </p>
   </div>
   <input

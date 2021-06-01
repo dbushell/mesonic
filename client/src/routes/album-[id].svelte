@@ -64,16 +64,18 @@
       <button
         on:click={onSong({...item})}
         type="button"
-        class="list-group-item list-group-item-action d-flex flex-wrap justify-content-between align-items-center"
+        class="list-group-item list-group-item-action pe-2"
         class:text-success={song && song.id === item.id}
       >
-        <span>
-          {#if song && song.id === item.id}<Headphones />{/if}
-          {item.title}
-        </span>
-        <span class="badge bg-light text-dark">
-          {formatTime(item.duration)}
-        </span>
+        <div class="d-flex justify-content-between align-items-start">
+          <span class="lh-sm">
+            {#if song && song.id === item.id}<Headphones />{/if}
+            {item.title}
+          </span>
+          <span class="badge bg-light text-dark font-monospace ms-1">
+            {formatTime(item.duration)}
+          </span>
+        </div>
         {#if item.progress}
           <div class="progress w-100 mt-2 mb-1" style="height: 0.125rem;">
             <div

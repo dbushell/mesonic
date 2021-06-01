@@ -54,10 +54,10 @@
     {#each artists as item (item.id)}
       <a
         href="/{item.id}"
-        class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+        class="list-group-item list-group-item-action d-flex justify-content-between align-items-start pe-2"
         class:text-success={song && song.artistId === item.id}
       >
-        <span>
+        <span class="lh-sm">
           {#if song && song.artistId === item.id}
             <Headphones />
           {:else if artist && artist.id === item.id}
@@ -65,7 +65,7 @@
           {/if}
           {item.name}
         </span>
-        <span class="badge bg-light text-dark">
+        <span class="badge bg-light text-dark font-monospace ms-1">
           {item.albumCount}
         </span>
       </a>

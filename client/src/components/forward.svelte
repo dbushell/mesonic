@@ -15,8 +15,8 @@
   class="btn btn-outline-primary text-nowrap"
 >
   <span
-    class="fs-7"
     aria-hidden="true"
+    class="fs-7 fw-light font-monospace"
     style="margin-inline-end: 0.1rem; vertical-align: 0.1rem;">30</span
   >
   <Forward />
