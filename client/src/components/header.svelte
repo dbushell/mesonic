@@ -1,34 +1,19 @@
 <script>
-  import {navigating, page} from '$app/stores';
   import Browse from '../icons/browse.svelte';
   import Settings from '../icons/settings.svelte';
   import Bookmarks from '../icons/bookmarks.svelte';
+  import Broadcast from '../icons/broadcast.svelte';
 
   export let heading;
-
-  let isBookmarks;
-  let isSettings;
-  let isBrowse;
-  // let isLoading;
-
-  // navigating.subscribe((state) => {
-  //   if (state) {
-  //     isLoading = true;
-  //   } else {
-  //     setTimeout(() => (isLoading = false), 750);
-  //   }
-  // });
-
-  $: {
-    isBookmarks = /^\/bookmarks/.test($page.path);
-    isSettings = /^\/settings/.test($page.path);
-    isBrowse = !isBookmarks && !isSettings;
-  }
+  export let isBrowse;
+  export let isBookmarks;
+  export let isPodcasts;
+  export let isSettings;
 </script>
 
 <header class="navbar border-bottom pb-0">
   <nav class="container-fluid align-items-end">
-    <h1 class="navbar-brand mb-1">
+    <h1 class="navbar-brand py-1 mb-1 me-1">
       <a class="d-flex align-items-center text-decoration-none" href="/">
         <div class="me-1">
           <img
@@ -52,6 +37,17 @@
         >
           <Browse />
           <span class="visually-hidden">Browse</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a
+          href="/podcasts"
+          class="nav-link"
+          class:active={isPodcasts}
+          aria-current={isPodcasts ? 'page' : 'false'}
+        >
+          <Broadcast />
+          <span class="visually-hidden">Podcasts</span>
         </a>
       </li>
       <li class="nav-item">

@@ -1,29 +1,16 @@
-// Utils
-import * as log from 'log';
+// SQL
 import {sprintf} from 'printf';
 
-// Sort alphabetical with "Track 10" after " Track 1"
-const naturalCollator = new Intl.Collator(undefined, {
-  numeric: true,
-  sensitivity: 'base'
-});
-export const naturalSort = (item, key = 'name') =>
-  item.sort((a, b) => naturalCollator.compare(a[key], b[key]));
-
-// Return get/set compatible object from request methods
-export const getRequestData = async (request) => {
-  try {
-    if (request.method === 'GET') {
-      return new Map(new URL(request.url).searchParams.entries());
+// CSV parsing options to convert integers
+export const parseOptions = {
+  skipFirstRow: true,
+  parse: (item) => {
+    for (const [key, value] of Object.entries(item)) {
+      if (!['path', 'name'].includes(key)) {
+        item[key] = isNaN(value) ? value : Number.parseInt(value, 10);
+      }
     }
-    if (request.headers.get('content-type') === 'application/json') {
-      return new Map(Object.entries(await request.json()));
-    }
-    if (request.method === 'POST') {
-      return new Map((await request.formData()).entries());
-    }
-  } catch (err) {
-    log.error(err);
+    return item;
   }
 };
 
@@ -32,6 +19,8 @@ export const getRequestData = async (request) => {
 export const sqlf = (str, ...args) => {
   args = args.map((val) => {
     switch (typeof val) {
+      case 'object':
+        return Object.values(val)[0].replace(/[^a-z_]/g, '');
       case 'boolean':
         return val ? 'true' : 'false';
       case 'number':

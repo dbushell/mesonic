@@ -1,7 +1,7 @@
 // Files
 import * as log from 'log';
 import * as path from 'path';
-import {EXTENSIONS} from './constants.js';
+import {EXTENSIONS} from '../constants.js';
 
 // Directory names must begin with `[A-Za-z0-9_]` character class
 const r_dir = /^\w/;

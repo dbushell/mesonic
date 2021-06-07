@@ -1,6 +1,6 @@
 <script context="module">
   import {prerendering} from '$app/env';
-  import {fetchSongs} from '../stores.js';
+  import {fetchEpisodes} from '../stores.js';
 
   export const load = async ({fetch, page}) => {
     const props = {id: page.params.id};
@@ -9,7 +9,7 @@
     }
     return {
       props: {
-        songs: await fetchSongs(props)
+        episodes: await fetchEpisodes(props)
       }
     };
   };
@@ -18,10 +18,10 @@
 <script>
   import {onDestroy} from 'svelte';
   import {songStore, bookmarkStore} from '../stores.js';
-  import {formatTime} from '../utils.js';
+  import {formatDate, formatTime} from '../utils.js';
   import Headphones from '../icons/headphones.svelte';
 
-  export let songs = [];
+  export let episodes = [];
 
   let song;
   let unsubscribe = [];
@@ -37,14 +37,14 @@
   );
 
   $: {
-    songs.map((song, i) => {
-      songs[i].progress = 0;
+    episodes.map((song, i) => {
+      episodes[i].progress = 0;
       $bookmarkStore.find((item) => {
         if (
           song.id === item?.entry[0]?.id &&
           song.type === item?.entry[0]?.type
         ) {
-          songs[i].progress = item.progress;
+          episodes[i].progress = item.progress;
           return true;
         }
       });
@@ -56,28 +56,48 @@
   };
 </script>
 
-<h2 class="visually-hidden">Songs</h2>
+<h2 class="mb-3 fs-3">
+  <a href="/podcasts" class="text-secondary text-decoration-none">Episodes</a>
+</h2>
 <div class="list-group">
-  {#if songs.length === 0}
-    <div class="list-group-item text-danger border-danger">
-      Failed to fetch songs
-    </div>
+  {#if episodes.length === 0}
+    <div class="list-group-item bg-light text-dark">No episodes found</div>
   {:else}
-    {#each songs as item (item.id)}
+    {#each episodes as item (item.id)}
       <button
         on:click={onSong({...item})}
         type="button"
-        class="list-group-item list-group-item-action pe-2"
+        class="list-group-item list-group-item-action px-2"
         class:text-success={song && song.id === item.id}
       >
-        <div class="d-flex justify-content-between align-items-start">
-          <span class="lh-sm">
-            {#if song && song.id === item.id}<Headphones />{/if}
-            {item.title}
-          </span>
-          <span class="badge bg-light text-dark font-monospace ms-1">
-            {formatTime(item.duration)}
-          </span>
+        <div class="d-flex">
+          <img
+            alt={item.album}
+            src={item.coverArt}
+            class="rounded me-2"
+            width="40"
+            height="40"
+            loading="lazy"
+          />
+          <div class="flex-grow-1">
+            <div class="d-flex justify-content-between align-items-start">
+              <span class="lh-sm">
+                {#if song && song.id === item.id}<Headphones />{/if}
+                {item.title}
+              </span>
+              {#if item.duration}
+                <span class="badge bg-light text-dark font-monospace ms-1">
+                  {formatTime(item.duration)}
+                </span>
+              {/if}
+            </div>
+            <time
+              class="fs-7 text-dark"
+              datetime={new Date(item.modified).toISOString()}
+            >
+              {formatDate(new Date(item.modified))}
+            </time>
+          </div>
         </div>
         {#if item.progress}
           <div class="progress w-100 mt-2 mb-1" style="height: 0.125rem;">

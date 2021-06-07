@@ -52,7 +52,18 @@
 }
 .nav-tabs {
   margin-bottom: -1px;
-  margin-inline-end: -0.25rem;
+  margin-inline-end: -0.5rem;
+}
+.nav-tabs .nav-item + .nav-item {
+  margin-left: -1px;
+}
+@media (max-width: 21.25rem) {
+  .navbar-brand {
+    font-size: 1rem;
+  }
+  .nav-tabs .nav-link {
+    padding-inline: 0.875rem;
+  }
 }
 .bs-popover-top > .popover-arrow::after {
   border-top-color: currentColor;
@@ -86,6 +97,17 @@
 }
 .player-toolbar .btn-toolbar {
   flex-basis: 50%;
+}
+.player-toolbar .btn .bi {
+  height: 1.375rem;
+  width: 1.375rem;
+  margin-block-start: 0.125rem;
+  vertical-align: top;
+}
+.player-toolbar .btn [aria-hidden] {
+  font-size: 0.5rem !important;
+  letter-spacing: -0.0625rem;
+  margin-block-start: 0.0625rem;
 }
 .form-range {
   --range-color: var(--bs-primary);

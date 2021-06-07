@@ -1,14 +1,13 @@
-// Mod
+// Module
 import * as log from 'log';
 import * as path from 'path';
 import * as api from './api.js';
 import * as tasks from './tasks.js';
-import {getRequestData} from './utils.js';
 import {HEADERS} from './constants.js';
 
 await tasks.checkEnv();
 
-log.info('meSonic v0.14.8');
+log.info('meSonic v0.16.3');
 
 // Return the version
 if (Deno.args.includes('--version')) {
@@ -22,8 +21,25 @@ await tasks.createDatabase();
 if (Deno.args.includes('--no-sync')) {
   await tasks.tidyDatabase();
 } else {
-  await tasks.syncMedia();
+  await tasks.syncData();
 }
+
+// Return get/set compatible object from request methods
+const getRequestData = async (request) => {
+  try {
+    if (request.method === 'GET') {
+      return new Map(new URL(request.url).searchParams.entries());
+    }
+    if (request.headers.get('content-type') === 'application/json') {
+      return new Map(Object.entries(await request.json()));
+    }
+    if (request.method === 'POST') {
+      return new Map((await request.formData()).entries());
+    }
+  } catch (err) {
+    log.error(err);
+  }
+};
 
 // Return response body JSON (or `Response`) for REST API requests
 const getResponse = async (request) => {
@@ -55,9 +71,6 @@ const getResponse = async (request) => {
   }
   if (pathname === '/rest/getPlaylists.view') {
     return await api.getPlaylists();
-  }
-  if (pathname === '/rest/getPodcasts.view') {
-    return await api.getPodcasts();
   }
   if (pathname === '/rest/getUser.view') {
     return await api.getUser();
@@ -117,13 +130,49 @@ const getResponse = async (request) => {
       log.error(err);
     }
   }
+  if (pathname === '/rest/getPodcasts.view') {
+    try {
+      const form = await getRequestData(request);
+      return await api.getPodcasts(form.get('id'));
+    } catch (err) {
+      log.warning(err);
+      return {
+        status: 'failed',
+        error: {code: 70, message: 'Podcast(s) not found'}
+      };
+    }
+  }
+  if (pathname === '/rest/createPodcastChannel.view') {
+    try {
+      const form = await getRequestData(request);
+      return await api.createPodcastChannel(form.get('url'));
+    } catch (err) {
+      log.warning(err);
+      return {
+        status: 'failed',
+        error: {code: 70, message: 'Podcast URL not found'}
+      };
+    }
+  }
+  if (pathname === '/rest/deletePodcastChannel.view') {
+    try {
+      const form = await getRequestData(request);
+      return await api.deletePodcastChannel(form.get('id'));
+    } catch (err) {
+      log.warning(err);
+      return {
+        status: 'failed',
+        error: {code: 70, message: 'Podcast not found'}
+      };
+    }
+  }
   if (pathname === '/rest/getArtists.view') {
     return await api.getArtists();
   }
   if (pathname === '/rest/getArtist.view') {
     try {
       const form = await getRequestData(request);
-      return await api.getArtist(form.get('id').replace(/[^\d]/g, ''));
+      return await api.getArtist(form.get('id'));
     } catch (err) {
       log.warning(err);
       return {
@@ -135,7 +184,7 @@ const getResponse = async (request) => {
   if (pathname === '/rest/getAlbum.view') {
     try {
       const form = await getRequestData(request);
-      return await api.getAlbum(form.get('id').replace(/[^\d]/g, ''));
+      return await api.getAlbum(form.get('id'));
     } catch (err) {
       log.warning(err);
       return {

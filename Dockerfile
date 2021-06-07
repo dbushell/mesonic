@@ -2,7 +2,8 @@ FROM ghcr.io/dbushell/ubuntu
 
 COPY --from=caddy:latest /usr/bin/caddy /usr/bin/caddy
 
-ENV MESONIC_MEDIA ${MESONIC_MEDIA:-/data}
+ENV MESONIC_MEDIA ${MESONIC_MEDIA:-/data/media}
+ENV MESONIC_PODCASTS ${MESONIC_PODCASTS:-/data/podcasts}
 ENV MESONIC_CONFIG ${MESONIC_CONFIG:-/config}
 ENV MESONIC_DEV ${MESONIC_DEV:-0}
 USER root
@@ -12,8 +13,10 @@ RUN apt update \
   && apt install -y ffmpeg sqlite3
 
 RUN mkdir -p ${MESONIC_MEDIA} \
+  && mkdir -p ${MESONIC_PODCASTS} \
   && mkdir -p ${MESONIC_CONFIG} \
   && chown -R ${PUID}:${PGID} ${MESONIC_MEDIA} \
+  && chown -R ${PUID}:${PGID} ${MESONIC_PODCASTS} \
   && chown -R ${PUID}:${PGID} ${MESONIC_CONFIG}
 
 COPY server/ ${HOME}/server

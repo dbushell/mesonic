@@ -1,9 +1,10 @@
 // Tasks
 import * as log from 'log';
 import * as path from 'path';
-import * as sync from './sync.js';
-import * as sqlite from './sqlite.js';
-import {MEDIA, CONFIG, SCHEMA, DATABASE} from './constants.js';
+import * as sqlite from './sqlite/mod.js';
+import {syncMedia} from './media/mod.js';
+import {syncPodcasts} from './podcasts/mod.js';
+import {MEDIA, CONFIG, DATABASE, PODCASTS_SYNC_INTERVAL} from './constants.js';
 
 // Check directories set by environment variables
 export const checkEnv = async () => {
@@ -40,30 +41,58 @@ export const checkEnv = async () => {
 
 // Initialise new database with tables
 export const createDatabase = async () => {
-  try {
-    const stat = await Deno.lstat(DATABASE);
-    if (!stat.isFile) {
-      await Deno.remove(DATABASE);
-      throw new Error();
-    }
-  } catch (err) {
-    log.info(`💾 Creating database`);
-    await sqlite.execQuery(`.read ${SCHEMA}`);
+  const schema = [
+    path.join(Deno.cwd(), 'server/sqlite/schema-000.sql'),
+    path.join(Deno.cwd(), 'server/sqlite/schema-001.sql')
+  ];
+  const stat = await Deno.lstat(DATABASE);
+  if (!stat.isFile) {
+    log.info(`💾 Database setup`);
+    await Deno.remove(DATABASE);
+    await sqlite.execQuery(`.read ${schema[0]}`);
+  }
+  let i = await sqlite.runQuery('PRAGMA user_version', {readonly: false});
+  i = Number.parseInt(new TextDecoder().decode(i), 10);
+  for (++i; i < schema.length; i++) {
+    log.info(`💾 Database migration: "${schema[i]}"`);
+    await sqlite.execQuery(`.read ${schema[i]}`);
   }
 };
 
-// Sync media directory to database
-let isSync = false;
-export const syncMedia = async () => {
-  log.info(`⏳ Sync started`);
-  if (isSync) {
-    log.warn('Sync already in progress');
+let isMediaSync = false;
+let isPodcastSync = false;
+let podcastSync;
+
+export const syncData = async () => {
+  log.info(`⏳ Media sync started`);
+  if (isMediaSync) {
+    log.warning('Media sync already in progress');
   } else {
-    isSync = true;
-    await sync.syncData();
-    isSync = false;
+    isMediaSync = true;
+    await syncMedia();
+    isMediaSync = false;
   }
-  log.info('⌛ Sync done');
+  log.info('⌛ Media sync done');
+  if (podcastSync) {
+    return;
+  }
+  podcastSync = () => {
+    if (isPodcastSync) {
+      log.warning('Podcast sync already in progress');
+    }
+    isPodcastSync = true;
+    log.info('⌛ Podcast sync started');
+    syncPodcasts()
+      .then(() => {
+        log.info('⌛ Podcast sync done');
+      })
+      .catch((err) => log.error(err))
+      .finally(() => {
+        isPodcastSync = false;
+        setTimeout(podcastSync, PODCASTS_SYNC_INTERVAL);
+      });
+  };
+  podcastSync();
 };
 
 // Remove old media from database

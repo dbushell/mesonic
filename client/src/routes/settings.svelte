@@ -61,36 +61,35 @@
   };
 </script>
 
-<div class="pt-2">
-  <p class="mb-1" id="playback-rate">Playback rate</p>
-  <div
-    class="d-flex justify-content-between align-items-center"
-    aria-hidden="true"
-  >
-    <p class="text-dark m-0">
-      <span class="fs-7 fw-light font-monospace">1.0</span>
-    </p>
-    <p class="m-0 fs-6 text-success d-inline-flex align-items-center">
-      <span class="ms-1 font-monospace">{rate}</span>
-      <span>&times;</span>
-    </p>
-    <p class="text-dark text-end m-0 ">
-      <span class="fs-7 fw-light font-monospace">2.0</span>
-    </p>
-  </div>
-  <input
-    type="range"
-    class="form-range d-block text-success"
-    style="--range-color: var(--bs-green);"
-    aria-labelledby="playback-rate"
-    max="2"
-    min="1"
-    step="0.1"
-    value={rate}
-    on:change={onRateChange}
-    on:input={onRateChange}
-  />
+<h2 class="text-secondary mb-3 fs-3">Settings</h2>
+<p class="mb-1" id="playback-rate">Playback rate</p>
+<div
+  class="d-flex justify-content-between align-items-center"
+  aria-hidden="true"
+>
+  <p class="text-dark m-0">
+    <span class="fs-7 fw-light font-monospace">1.0</span>
+  </p>
+  <p class="m-0 fs-6 text-success d-inline-flex align-items-center">
+    <span class="ms-1 font-monospace">{rate}</span>
+    <span>&times;</span>
+  </p>
+  <p class="text-dark text-end m-0 ">
+    <span class="fs-7 fw-light font-monospace">2.0</span>
+  </p>
 </div>
+<input
+  type="range"
+  class="form-range d-block text-success"
+  style="--range-color: var(--bs-green);"
+  aria-labelledby="playback-rate"
+  max="2"
+  min="1"
+  step="0.1"
+  value={rate}
+  on:change={onRateChange}
+  on:input={onRateChange}
+/>
 <form on:submit={onSettings} method="POST" class="mt-4 pt-4 border-top">
   <div class="mb-3">
     <label

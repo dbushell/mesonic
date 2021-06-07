@@ -10,3 +10,29 @@ export const formatTime = (s) => {
   const ss = String(s % 60).padStart('2', '0');
   return `${hh}:${mm}:${ss}`.replace(/^00:/, '');
 };
+
+const relativeFormat = new Intl.RelativeTimeFormat('en-GB', {numeric: 'auto'});
+const shortFormat = new Intl.DateTimeFormat('en-GB', {weekday: 'long'});
+const longFormat = new Intl.DateTimeFormat('en-GB', {
+  weekday: 'short',
+  day: 'numeric',
+  month: 'short',
+  year: 'numeric'
+});
+
+// Limit relative format to one week
+export const formatDate = (date) => {
+  let str;
+  const days = Math.ceil((date - new Date()) / 86400000);
+  if (days > -6) {
+    if (days > -2) {
+      str = relativeFormat.format(days, 'day');
+    } else {
+      str = shortFormat.format(date);
+    }
+    str = str.charAt(0).toUpperCase() + str.slice(1);
+  } else {
+    str = longFormat.format(date);
+  }
+  return str;
+};

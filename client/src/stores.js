@@ -5,6 +5,7 @@ export const proxyStore = writable();
 export const serverStore = writable();
 export const authStore = writable({username: '', password: ''});
 export const playbackStore = writable({rate: '1.0'});
+export const podcastStore = writable();
 export const artistStore = writable();
 export const albumStore = writable();
 export const songStore = writable();
@@ -107,6 +108,40 @@ export const updateServer = async (server) => {
   }
 };
 
+export const fetchPodcasts = async ({fetch} = {}) => {
+  try {
+    const [url, props] = await fetchProps('/rest/getPodcasts.view');
+    const response = await (fetch
+      ? fetch(url.pathname)
+      : globalThis.fetch(url, props));
+    const json = await response.json();
+    const podcasts = json['subsonic-response']?.podcasts;
+    return podcasts.channel;
+  } catch (err) {
+    console.log(err);
+    return [];
+  }
+};
+
+export const fetchEpisodes = async ({fetch, id}) => {
+  try {
+    const [url, props] = await fetchProps('/rest/getPodcasts.view', {
+      id,
+      includeEpisodes: true
+    });
+    const response = await (fetch
+      ? fetch(url.pathname)
+      : globalThis.fetch(url, props));
+    const json = await response.json();
+    const podcast = json['subsonic-response']?.podcasts?.channel[0];
+    podcastStore.set(podcast);
+    return podcast.episode;
+  } catch (err) {
+    console.log(err);
+    return [];
+  }
+};
+
 export const fetchArtists = async ({fetch} = {}) => {
   let artists = [];
   try {
@@ -188,8 +223,9 @@ export const createBookmark = async ({id, position}) => {
     });
     const response = await fetch(url, props);
     const json = await response.json();
-    if (json['subsonic-response']?.status !== 'ok') {
-      throw new Error(json);
+    const {status, error} = json['subsonic-response'];
+    if (status !== 'ok') {
+      throw new Error(error?.message);
     }
     fetchBookmarks();
   } catch (err) {
@@ -203,10 +239,46 @@ export const deleteBookmark = async ({id}) => {
     const [url, props] = await fetchProps('/rest/deleteBookmark.view', {id});
     const response = await fetch(url, props);
     const json = await response.json();
-    if (json['subsonic-response']?.status !== 'ok') {
-      throw new Error(json);
+    const {status, error} = json['subsonic-response'];
+    if (status !== 'ok') {
+      throw new Error(error?.message);
     }
     fetchBookmarks();
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+// Add new podcast
+export const createPodcast = async (data) => {
+  try {
+    const [url, props] = await fetchProps('/rest/createPodcastChannel.view', {
+      url: data.url
+    });
+    const response = await fetch(url, props);
+    const json = await response.json();
+    const {status, error} = json['subsonic-response'];
+    if (status !== 'ok') {
+      throw new Error(error?.message);
+    }
+    return true;
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+// Remove existing podcast
+export const deletePodcast = async ({id}) => {
+  try {
+    const [url, props] = await fetchProps('/rest/deletePodcastChannel.view', {
+      id
+    });
+    const response = await fetch(url, props);
+    const json = await response.json();
+    const {status, error} = json['subsonic-response'];
+    if (status !== 'ok') {
+      throw new Error(error?.message);
+    }
   } catch (err) {
     console.log(err);
   }
@@ -225,9 +297,9 @@ export const getScanStatus = async (isStart = true) => {
     );
     const response = await fetch(url, props);
     const json = await response.json();
-    const {status, scanStatus} = json['subsonic-response'];
+    const {status, scanStatus, error} = json['subsonic-response'];
     if (status !== 'ok') {
-      throw new Error(json);
+      throw new Error(error?.message);
     }
     scanStore.set({...scanStatus});
     if (scanStatus.scanning === true) {
@@ -243,6 +315,10 @@ export const nextSongStore = derived(
   [serverStore, songStore],
   async ([$serverStore, $songStore], set) => {
     if (!$songStore || !($serverStore instanceof URL)) {
+      return;
+    }
+    if (['episode'].includes($songStore.type)) {
+      set(null);
       return;
     }
     try {

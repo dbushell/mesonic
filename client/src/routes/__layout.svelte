@@ -78,7 +78,8 @@
   import Header from '../components/header.svelte';
   import Footer from '../components/footer.svelte';
   import Player from '../components/player.svelte';
-  import {artistStore, albumStore, songStore} from '../stores.js';
+  import Browse from '../components/browse.svelte';
+  import {songStore} from '../stores.js';
 
   const heading = `meSonic`;
   let title = heading;
@@ -92,47 +93,29 @@
       }
     }
   }
+
+  let isBrowse;
+  let isBookmarks;
+  let isPodcasts;
+  let isSettings;
+
+  $: {
+    isBookmarks = /^\/bookmarks/.test($page.path);
+    isPodcasts = /^\/podcast/.test($page.path);
+    isSettings = /^\/settings/.test($page.path);
+    isBrowse = !(isPodcasts || isBookmarks || isSettings);
+  }
 </script>
 
 <svelte:head>
   <title>{title}</title>
 </svelte:head>
-<Header {heading} />
+<Header {heading} {isBrowse} {isBookmarks} {isPodcasts} {isSettings} />
 <Player />
 <main class="container-fluid mb-5">
-  <div class="btn-toolbar mb-3">
-    <div
-      class="btn-group flex-grow-1"
-      aria-label="browse categories"
-      role="toolbar"
-    >
-      <a
-        href="/"
-        class:active={$page.path === '/'}
-        class="btn btn-outline-secondary"
-      >
-        Artists
-      </a>
-      <a
-        href={$artistStore ? `/${$artistStore.id}` : `/`}
-        class:pe-none={!$artistStore}
-        class:btn-outline-dark={!$artistStore}
-        class:active={/^\/artist/.test($page.path)}
-        class="btn btn-outline-secondary"
-      >
-        Albums
-      </a>
-      <a
-        href={$albumStore ? `/${$albumStore.id}` : `/`}
-        class:pe-none={!$albumStore}
-        class:btn-outline-dark={!$albumStore}
-        class:active={/^\/album/.test($page.path)}
-        class="btn btn-outline-secondary"
-      >
-        Tracks
-      </a>
-    </div>
-  </div>
+  {#if isBrowse}
+    <Browse />
+  {/if}
   <slot />
 </main>
 <Footer />

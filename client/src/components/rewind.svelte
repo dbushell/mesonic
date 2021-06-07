@@ -1,6 +1,7 @@
 <script>
   import {createEventDispatcher} from 'svelte';
   import Rewind from '../icons/rewind.svelte';
+  import Counterclockwise from '../icons/counterclockwise.svelte';
 
   const dispatch = createEventDispatcher();
 
@@ -11,13 +12,14 @@
   disabled={isDisabled}
   on:click={() => dispatch('click')}
   type="button"
-  aria-label="rewind 30 seconds"
+  aria-label="rewind 15 seconds"
   class="btn btn-outline-primary text-nowrap"
 >
-  <Rewind />
+  <Counterclockwise />
   <span
     aria-hidden="true"
-    class="fs-7 fw-light font-monospace"
-    style="margin-inline-start: 0.1rem; vertical-align: 0.1rem;">30</span
+    class="fs-7 font-monospace position-absolute top-50 start-50 translate-middle"
   >
+    15
+  </span>
 </button>

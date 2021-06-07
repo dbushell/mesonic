@@ -133,7 +133,10 @@
     audio.playbackRate = playbackRate;
     onLoadedPosition = 0;
     const bookmarked = bookmarks.find((item) => {
-      if (item?.entry[0]?.id === song.id) {
+      if (
+        song.id === item?.entry[0]?.id &&
+        song.type === item?.entry[0]?.type
+      ) {
         onLoadedPosition = item.position;
         audio.currentTime = onLoadedPosition / 1000;
         return true;
@@ -181,7 +184,7 @@
 
   const onEnded = () => {
     isPlaying = false;
-    deleteBookmark({id: song.id});
+    deleteBookmark(song);
     if (nextSong) {
       songStore.set({...nextSong, autoplay: true});
     }
@@ -204,12 +207,6 @@
       return (ev.returnValue = '...');
     }
   };
-
-  // Audio debug events
-  // on:suspend={(ev) => console.log(ev)}
-  // on:stalled={(ev) => console.log(ev)}
-  // on:waiting={(ev) => console.log(ev)}
-  // on:error={(ev) => console.log(ev)}
 </script>
 
 <svelte:window on:beforeunload|capture={onBeforeUnload} />
@@ -219,7 +216,17 @@
   <div class="d-flex flex-wrap align-items-center mb-1">
     <h2 class="visually-hidden">Audio Player</h2>
     {#if song}
-      <p class="h6 lh-base d-flex align-items-center m-0 me-auto">
+      <p class="h6 lh-base m-0 me-auto">
+        {#if song.coverArt}
+          <img
+            alt={song.title}
+            src={song.coverArt}
+            class="d-inline-block align-top rounded me-1"
+            width="24"
+            height="24"
+            loading="lazy"
+          />
+        {/if}
         {#if !isLoaded}
           <span role="status" class="spinner-border spinner-border-sm me-1">
             <span class="visually-hidden">Loading…</span>
@@ -268,7 +275,9 @@
         <div
           class="popover-arrow position-absolute top-100 start-50 translate-middle-x"
         />
-        <div class="popover-body text-white font-monospace fs-7 p-1 px-2">{rangeNow}</div>
+        <div class="popover-body text-white font-monospace fs-7 p-1 px-2">
+          {rangeNow}
+        </div>
       </div>
     {/if}
     <Atom {isPlaying} />
@@ -294,7 +303,7 @@
       >
         <RewindButton
           isDisabled={!isLoaded}
-          on:click={() => (audio.currentTime -= 30)}
+          on:click={() => (audio.currentTime -= 15)}
         />
         {#if isPlaying}
           <PauseButton isDisabled={!isLoaded} on:click={() => audio.pause()} />
@@ -303,7 +312,7 @@
         {/if}
         <ForwardButton
           isDisabled={!isLoaded}
-          on:click={() => (audio.currentTime += 30)}
+          on:click={() => (audio.currentTime += 15)}
         />
       </div>
     </div>

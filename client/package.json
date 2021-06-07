@@ -1,6 +1,6 @@
 {
   "name": "mesonic",
-  "version": "0.14.8",
+  "version": "0.16.3",
   "private": true,
   "scripts": {
     "dev": "npx svelte-kit dev",

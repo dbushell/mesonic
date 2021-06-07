@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   mesonic:
     container_name: mesonic
@@ -10,7 +8,8 @@ services:
     restart: unless-stopped
     volumes:
       - ./config:/config
-      - /Volumes/Audiobooks:/data:ro
+      - /Volumes/Audiobooks:/data/media:ro
+      - /Volumes/Podcasts:/data/podcasts
       - ./server:/home/user/server
       - ./client:/home/user/client
     environment:
