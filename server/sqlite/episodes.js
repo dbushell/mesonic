@@ -2,12 +2,12 @@
 import * as log from 'log';
 import * as csv from 'csv';
 import {parseOptions, sqlf} from './utils.js';
-import {execQuery, runQuery} from './mod.js';
+import {getMeta, execQuery, runQuery} from './mod.js';
 
 const textDecoder = new TextDecoder();
 
 // Query and parse `episodes` table
-export const getEpisodes = async ({podcast_id, key, value}) => {
+export const getEpisodes = async ({podcast_id, meta, key, value}) => {
   try {
     let query = 'SELECT * FROM `episodes`';
     if (key && value) {
@@ -27,7 +27,22 @@ export const getEpisodes = async ({podcast_id, key, value}) => {
     if (!data.trim()) {
       return [];
     }
-    return await csv.parse(data, parseOptions);
+    const episodes = await csv.parse(data, parseOptions);
+    if (meta) {
+      const meta_map = {};
+      const ids = episodes.map((episode) => episode.id);
+      (await getMeta({ids})).forEach((meta) => {
+        const entity = meta_map[meta.entity_id] ?? {};
+        entity[meta.key] = meta.value;
+        meta_map[meta.entity_id] = entity;
+      });
+      episodes.forEach((episode) => {
+        if (episode.id in meta_map) {
+          episode.meta = meta_map[episode.id];
+        }
+      });
+    }
+    return episodes;
   } catch (err) {
     log.error(err);
     return [];

@@ -19,6 +19,8 @@ export const parseOptions = {
 export const sqlf = (str, ...args) => {
   args = args.map((val) => {
     switch (typeof val) {
+      case 'function':
+        return val();
       case 'object':
         return Object.values(val)[0].replace(/[^a-z_]/g, '');
       case 'boolean':

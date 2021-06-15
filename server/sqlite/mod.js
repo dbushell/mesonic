@@ -6,6 +6,7 @@ import {deleteAlbumOrphans} from './albums.js';
 import {deleteEpisodeOrphans} from './episodes.js';
 import {deleteSongOrphans} from './songs.js';
 import {deleteBookmarkOrphans} from './bookmarks.js';
+import {deleteMetaOrphans} from './meta.js';
 
 // Limit queries to avoid locked database
 const queries = new Queue();
@@ -59,6 +60,7 @@ export const deleteOrphans = async () => {
   await deleteEpisodeOrphans();
   await deleteSongOrphans();
   await deleteBookmarkOrphans();
+  await deleteMetaOrphans();
 };
 
 export * from './albums.js';
@@ -67,3 +69,4 @@ export * from './bookmarks.js';
 export * from './episodes.js';
 export * from './podcasts.js';
 export * from './songs.js';
+export * from './meta.js';

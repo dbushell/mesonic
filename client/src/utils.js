@@ -23,7 +23,9 @@ const longFormat = new Intl.DateTimeFormat('en-GB', {
 // Limit relative format to one week
 export const formatDate = (date) => {
   let str;
-  const days = Math.ceil((date - new Date()) / 86400000);
+  const now = new Date().setUTCHours(0, 0, 0, 0);
+  const then = date.setUTCHours(0, 0, 0, 0);
+  const days = (then - now) / 86400000;
   if (days > -6) {
     if (days > -2) {
       str = relativeFormat.format(days, 'day');

@@ -39,6 +39,9 @@ export const songData = (song, artist, album, include_path = false) => {
     size: song.size,
     type: 'song'
   };
+  if (song.meta) {
+    value.meta = song.meta;
+  }
   if (song.path) {
     const parse_path = path.parse(song.path);
     value.suffix = parse_path.ext.substring(1);
@@ -130,15 +133,16 @@ export const getScanStatus = async () => {
   return {scanStatus: {count, scanning: isScan}};
 };
 
-export const getPodcasts = async (id = 0) => {
+export const getPodcasts = async (id = 0, meta = false) => {
   id = String(id).replace(/[^\d]/g, '');
   id = isNaN(id) ? 0 : Number.parseInt(id, 10);
+  meta = Boolean(meta);
   const podcasts = await sqlite.getPodcasts(id ? {key: 'id', value: id} : {});
   const channel = podcasts.map(podcastData);
   if (id) {
     await Promise.all(
       channel.map(async (podcast) => {
-        podcast.episode = await sqlite.getEpisodes({podcast_id: id});
+        podcast.episode = await sqlite.getEpisodes({meta, podcast_id: id});
         podcast.episode = podcast.episode.map((episode) =>
           episodeData(episode, podcast)
         );
@@ -264,6 +268,15 @@ export const createBookmark = async (type_id, position, comment) => {
   type = type || 'song';
   await sqlite.deleteBookmark(id, type);
   await sqlite.insertBookmark({entity_id: id, type, position, comment});
+  // Add meta for podcasts
+  if (['episode'].includes(type)) {
+    await sqlite.insertMeta({
+      type,
+      entity_id: id,
+      key: 'played',
+      value: 1
+    });
+  }
 };
 
 export const deleteBookmark = async (type_id) => {

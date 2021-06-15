@@ -48,7 +48,7 @@
       <a
         href="/{item.id}"
         class="list-group-item list-group-item-action px-2 d-flex"
-        class:text-success={song && song.albumId === item.id}
+        class:text-primary={song && song.albumId === item.id}
       >
         <img
           alt={item.title}

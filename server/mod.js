@@ -7,7 +7,7 @@ import {HEADERS} from './constants.js';
 
 await tasks.checkEnv();
 
-log.info('meSonic v0.16.3');
+log.info('meSonic v0.16.4');
 
 // Return the version
 if (Deno.args.includes('--version')) {
@@ -39,6 +39,7 @@ const getRequestData = async (request) => {
   } catch (err) {
     log.error(err);
   }
+  return new Map();
 };
 
 // Return response body JSON (or `Response`) for REST API requests
@@ -47,9 +48,10 @@ const getResponse = async (request) => {
     return;
   }
   const {pathname} = new URL(request.url);
+  const form = await getRequestData(request);
   if (pathname === '/rest/test.view') {
     const data = {};
-    for (const pair of await getRequestData(request)) {
+    for (const pair of form) {
       data[pair[0]] = pair[1];
     }
     return {data};
@@ -95,7 +97,6 @@ const getResponse = async (request) => {
   }
   if (pathname === '/rest/getMusicDirectory.view') {
     try {
-      const form = await getRequestData(request);
       return await api.getMusicDirectory(form.get('id'));
     } catch (err) {
       log.warning(err);
@@ -110,7 +111,6 @@ const getResponse = async (request) => {
   }
   if (pathname === '/rest/createBookmark.view') {
     try {
-      const form = await getRequestData(request);
       await api.createBookmark(
         form.get('id'),
         form.get('position'),
@@ -123,7 +123,6 @@ const getResponse = async (request) => {
   }
   if (pathname === '/rest/deleteBookmark.view') {
     try {
-      const form = await getRequestData(request);
       await api.deleteBookmark(form.get('id'));
       return {};
     } catch (err) {
@@ -132,8 +131,7 @@ const getResponse = async (request) => {
   }
   if (pathname === '/rest/getPodcasts.view') {
     try {
-      const form = await getRequestData(request);
-      return await api.getPodcasts(form.get('id'));
+      return await api.getPodcasts(form.get('id'), form.get('includeMeta'));
     } catch (err) {
       log.warning(err);
       return {
@@ -144,7 +142,6 @@ const getResponse = async (request) => {
   }
   if (pathname === '/rest/createPodcastChannel.view') {
     try {
-      const form = await getRequestData(request);
       return await api.createPodcastChannel(form.get('url'));
     } catch (err) {
       log.warning(err);
@@ -156,7 +153,6 @@ const getResponse = async (request) => {
   }
   if (pathname === '/rest/deletePodcastChannel.view') {
     try {
-      const form = await getRequestData(request);
       return await api.deletePodcastChannel(form.get('id'));
     } catch (err) {
       log.warning(err);
@@ -171,7 +167,6 @@ const getResponse = async (request) => {
   }
   if (pathname === '/rest/getArtist.view') {
     try {
-      const form = await getRequestData(request);
       return await api.getArtist(form.get('id'));
     } catch (err) {
       log.warning(err);
@@ -183,7 +178,6 @@ const getResponse = async (request) => {
   }
   if (pathname === '/rest/getAlbum.view') {
     try {
-      const form = await getRequestData(request);
       return await api.getAlbum(form.get('id'));
     } catch (err) {
       log.warning(err);
@@ -195,7 +189,6 @@ const getResponse = async (request) => {
   }
   if (pathname === '/rest/getSong.view') {
     try {
-      const form = await getRequestData(request);
       return await api.getSong(form.get('id'));
     } catch (err) {
       log.warning(err);
@@ -208,7 +201,6 @@ const getResponse = async (request) => {
   // Redirect stream to be handled by Caddy server
   if (pathname === '/rest/stream.view') {
     try {
-      const form = await getRequestData(request);
       const {song} = await api.getSong(form.get('id'), true);
       return new Response('', {
         status: 307,

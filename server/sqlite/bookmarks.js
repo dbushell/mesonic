@@ -33,25 +33,9 @@ export const getBookmarkByKeyValue = (key, value) =>
     bookmarks.find((bookmark) => bookmark[key] === value)
   );
 
-// Update bookmark data
-export const updateBookmark = (data) =>
-  execQuery(
-    sqlf(
-      'UPDATE `bookmarks`\
-      SET `modified_at`=%d,`entity_id`=%d,`position`=%d,`comment`=%s,`type`=%s\
-      WHERE `id`=%d LIMIT 1',
-      Date.now(),
-      data.entity_id,
-      data.position,
-      data.comment,
-      data.type,
-      data.id
-    )
-  );
-
 // Insert bookmark data
-export const insertBookmark = (data) =>
-  execQuery(
+export const insertBookmark = async (data) => {
+  await execQuery(
     sqlf(
       'INSERT INTO `bookmarks`\
       (`created_at`,`modified_at`,`entity_id`,`position`,`comment`,`type`)\
@@ -64,6 +48,7 @@ export const insertBookmark = (data) =>
       data.type
     )
   );
+};
 
 // Delete bookmark data
 export const deleteBookmark = async (id, type = 'song') => {
@@ -71,7 +56,11 @@ export const deleteBookmark = async (id, type = 'song') => {
     await execQuery(sqlf('DELETE FROM `bookmarks` WHERE `id`=%d LIMIT 1', id));
   } else {
     await execQuery(
-      sqlf('DELETE FROM `bookmarks` WHERE `entity_id`=%d AND `type`=%s', id, type)
+      sqlf(
+        'DELETE FROM `bookmarks` WHERE `entity_id`=%d AND `type`=%s',
+        id,
+        type
+      )
     );
   }
 };

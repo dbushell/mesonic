@@ -235,16 +235,10 @@
         <span>{song.title}</span>
       </p>
       <div class="d-flex flex-wrap">
-        <a
-          href={`/${song.artistId}`}
-          class="btn btn-link text-dark p-0 fs-7 fw-normal me-2"
-        >
+        <a href={`/${song.artistId}`} class="text-dark fs-7 me-2">
           {song.artist}
         </a>
-        <a
-          href={`/${song.albumId}`}
-          class="btn btn-link text-dark p-0 fs-7 fw-normal"
-        >
+        <a href={`/${song.albumId}`} class="text-dark fs-7">
           {song.album}
         </a>
       </div>

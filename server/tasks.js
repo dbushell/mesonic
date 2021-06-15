@@ -43,7 +43,8 @@ export const checkEnv = async () => {
 export const createDatabase = async () => {
   const schema = [
     path.join(Deno.cwd(), 'server/sqlite/schema-000.sql'),
-    path.join(Deno.cwd(), 'server/sqlite/schema-001.sql')
+    path.join(Deno.cwd(), 'server/sqlite/schema-001.sql'),
+    path.join(Deno.cwd(), 'server/sqlite/schema-002.sql')
   ];
   const stat = await Deno.lstat(DATABASE);
   if (!stat.isFile) {

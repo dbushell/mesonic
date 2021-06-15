@@ -20,6 +20,7 @@
   import {songStore, bookmarkStore} from '../stores.js';
   import {formatDate, formatTime} from '../utils.js';
   import Headphones from '../icons/headphones.svelte';
+  import Check from '../icons/check.svelte';
 
   export let episodes = [];
 
@@ -67,8 +68,12 @@
       <button
         on:click={onSong({...item})}
         type="button"
-        class="list-group-item list-group-item-action px-2"
-        class:text-success={song && song.id === item.id}
+        class="list-group-item list-group-item-action px-2 {song &&
+        song.id === item.id
+          ? 'text-primary'
+          : item?.meta?.played
+          ? 'text-success'
+          : ''}"
       >
         <div class="d-flex">
           <img
@@ -82,7 +87,11 @@
           <div class="flex-grow-1">
             <div class="d-flex justify-content-between align-items-start">
               <span class="lh-sm">
-                {#if song && song.id === item.id}<Headphones />{/if}
+                {#if song && song.id === item.id}
+                  <Headphones />
+                {:else if item?.meta?.played}
+                  <Check />
+                {/if}
                 {item.title}
               </span>
               {#if item.duration}

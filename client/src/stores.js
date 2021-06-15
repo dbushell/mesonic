@@ -127,6 +127,7 @@ export const fetchEpisodes = async ({fetch, id}) => {
   try {
     const [url, props] = await fetchProps('/rest/getPodcasts.view', {
       id,
+      includeMeta: true,
       includeEpisodes: true
     });
     const response = await (fetch

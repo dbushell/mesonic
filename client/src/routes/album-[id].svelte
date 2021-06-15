@@ -68,7 +68,7 @@
         on:click={onSong({...item})}
         type="button"
         class="list-group-item list-group-item-action pe-2"
-        class:text-success={song && song.id === item.id}
+        class:text-primary={song && song.id === item.id}
       >
         <div class="d-flex justify-content-between align-items-start">
           <span class="lh-sm">

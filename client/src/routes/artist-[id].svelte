@@ -56,7 +56,7 @@
       <a
         href="/{item.id}"
         class="list-group-item list-group-item-action d-flex justify-content-between align-items-start pe-2"
-        class:text-success={song && song.albumId === item.id}
+        class:text-primary={song && song.albumId === item.id}
       >
         <span class="lh-sm">
           {#if song && song.albumId === item.id}
