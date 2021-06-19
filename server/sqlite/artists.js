@@ -41,9 +41,9 @@ export const updateArtist = (data) =>
   execQuery(
     sqlf(
       'UPDATE `artists`\
-      SET `modified_at`=%d,`name`=%s,`path`=%s\
+      SET `modified_at`=%s,`name`=%s,`path`=%s\
       WHERE `id`=%d LIMIT 1',
-      Date.now(),
+      new Date().toISOString(),
       data.name,
       data.path,
       data.id
@@ -54,11 +54,7 @@ export const updateArtist = (data) =>
 export const insertArtist = (data) =>
   execQuery(
     sqlf(
-      'INSERT INTO `artists`\
-      (`created_at`,`modified_at`,`name`,`path`)\
-      VALUES (%d,%d,%s,%s)',
-      Date.now(),
-      Date.now(),
+      'INSERT INTO `artists` (`name`,`path`) VALUES (%s,%s)',
       data.name,
       data.path
     )

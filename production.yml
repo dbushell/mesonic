@@ -10,8 +10,6 @@ services:
       - ./config:/config
       - /Volumes/Audiobooks:/data/media:ro
       - /Volumes/Podcasts:/data/podcasts
-      - ./server:/home/user/server
-      - ./client:/home/user/client
     environment:
       - MESONIC_HOST=http://mesonic.localhost:4040
     ports:

@@ -41,15 +41,16 @@ export const checkEnv = async () => {
 
 // Initialise new database with tables
 export const createDatabase = async () => {
-  const schema = [
-    path.join(Deno.cwd(), 'server/sqlite/schema-000.sql'),
-    path.join(Deno.cwd(), 'server/sqlite/schema-001.sql'),
-    path.join(Deno.cwd(), 'server/sqlite/schema-002.sql')
-  ];
-  const stat = await Deno.lstat(DATABASE);
+  const schema = [path.join(Deno.cwd(), 'server/sqlite/schema-000.sql')];
+  let stat = {isFile: false};
+  try {
+    stat = await Deno.lstat(DATABASE);
+    if (!stat.isFile) {
+      await Deno.remove(DATABASE);
+    }
+  } catch (err) {}
   if (!stat.isFile) {
     log.info(`💾 Database setup`);
-    await Deno.remove(DATABASE);
     await sqlite.execQuery(`.read ${schema[0]}`);
   }
   let i = await sqlite.runQuery('PRAGMA user_version', {readonly: false});

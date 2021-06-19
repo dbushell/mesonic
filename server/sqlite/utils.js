@@ -1,12 +1,16 @@
 // SQL
 import {sprintf} from 'printf';
 
-// CSV parsing options to convert integers
+// CSV parsing options
 export const parseOptions = {
   skipFirstRow: true,
   parse: (item) => {
     for (const [key, value] of Object.entries(item)) {
-      if (!['path', 'name'].includes(key)) {
+      if (/_at$/.test(key)) {
+        // Convert dates
+        item[key] = new Date(value);
+      } else if (!['path', 'name'].includes(key)) {
+        // Convert integers
         item[key] = isNaN(value) ? value : Number.parseInt(value, 10);
       }
     }

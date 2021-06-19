@@ -18,7 +18,7 @@ export const getPodcasts = async ({key, value} = {}) => {
       query += sqlf(' WHERE `podcasts`.`%s`=%' + t + ' LIMIT 1', {key}, value);
     }
     if (!query.includes('LIMIT 1')) {
-      query += ' ORDER BY `podcasts`.`modified_at` DESC';
+      query += ' ORDER BY datetime(`podcasts`.`modified_at`) DESC';
     }
     const data = textDecoder.decode(await runQuery(query));
     if (!data.trim()) {
@@ -40,9 +40,9 @@ export const updatePodcast = (data) =>
   execQuery(
     sqlf(
       'UPDATE `podcasts`\
-      SET `modified_at`=%d,`url`=%s,`name`=%s\
+      SET `modified_at`=%s,`url`=%s,`name`=%s\
       WHERE `id`=%d LIMIT 1',
-      data.modified_at,
+      data.modified_at.toISOString(),
       data.url,
       data.name,
       data.id
@@ -53,11 +53,8 @@ export const updatePodcast = (data) =>
 export const insertPodcast = (data) =>
   execQuery(
     sqlf(
-      'INSERT INTO `podcasts`\
-      (`created_at`,`modified_at`,`url`,`name`)\
-      VALUES (%d,%d,%s,%s)',
-      Date.now(),
-      1,
+      'INSERT INTO `podcasts` (`modified_at`,`url`,`name`) VALUES (%s,%s,%s)',
+      new Date(0).toISOString(),
       data.url,
       data.name
     )

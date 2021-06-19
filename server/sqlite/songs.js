@@ -61,10 +61,8 @@ export const insertSong = (data) =>
   execQuery(
     sqlf(
       'INSERT INTO `songs`\
-      (`created_at`,`modified_at`,`artist_id`,`album_id`,`name`,`path`,`duration`,`bitrate`,`size`,`codec`)\
-      VALUES (%d,%d,%d,%d,%s,%s,0,0,0,"")',
-      Date.now(),
-      Date.now(),
+      (`artist_id`,`album_id`,`name`,`path`,`duration`,`bitrate`,`size`,`codec`)\
+      VALUES (%d,%d,%s,%s,0,0,0,"")',
       data.artist_id,
       data.album_id,
       data.name,
@@ -77,9 +75,9 @@ export const updateSong = (data) =>
   execQuery(
     sqlf(
       'UPDATE `songs`\
-      SET `modified_at`=%d,`artist_id`=%d,`album_id`=%d,`name`=%s,`path`=%s\
+      SET `modified_at`=%s,`artist_id`=%d,`album_id`=%d,`name`=%s,`path`=%s\
       WHERE `id`=%d LIMIT 1',
-      Date.now(),
+      new Date().toISOString(),
       data.artist_id,
       data.album_id,
       data.name,
@@ -93,9 +91,9 @@ export const updateSongMeta = (data) =>
   execQuery(
     sqlf(
       'UPDATE `songs`\
-      SET `modified_at`=%d,`duration`=%d,`bitrate`=%d,`size`=%d,`codec`=%s\
+      SET `modified_at`=%s,`duration`=%d,`bitrate`=%d,`size`=%d,`codec`=%s\
       WHERE `id`=%d LIMIT 1',
-      Date.now(),
+      new Date().toISOString(),
       data.duration,
       data.bitrate,
       data.size,

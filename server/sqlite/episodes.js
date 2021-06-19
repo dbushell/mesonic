@@ -21,7 +21,7 @@ export const getEpisodes = async ({podcast_id, meta, key, value}) => {
     if (key && value) {
       query += ' LIMIT 1';
     } else {
-      query += ' ORDER BY `episodes`.`modified_at` DESC';
+      query += ' ORDER BY datetime(`episodes`.`modified_at`) DESC';
     }
     const data = textDecoder.decode(await runQuery(query));
     if (!data.trim()) {
@@ -58,10 +58,9 @@ export const insertEpisode = (data) =>
   execQuery(
     sqlf(
       'INSERT INTO `episodes`\
-      (`created_at`,`modified_at`,`podcast_id`,`url`,`name`,`path`,`duration`,`size`)\
-      VALUES (%d,%d,%d,%s,%s,%s,%d,%d)',
-      Date.now(),
-      data.modified_at,
+      (`modified_at`,`podcast_id`,`url`,`name`,`path`,`duration`,`size`)\
+      VALUES (%s,%d,%s,%s,%s,%d,%d)',
+      data.modified_at.toISOString(),
       data.podcast_id,
       data.url,
       data.name,

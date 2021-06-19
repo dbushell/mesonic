@@ -1,6 +1,6 @@
 // API
 import * as path from 'path';
-import * as hash from 'hash';
+import * as hex from 'hex';
 import * as tasks from './tasks.js';
 import * as sqlite from './sqlite/mod.js';
 import {createPodcast} from './podcasts/mod.js';
@@ -13,9 +13,13 @@ const naturalCollator = new Intl.Collator(undefined, {
 const naturalSort = (item, key = 'name') =>
   item.sort((a, b) => naturalCollator.compare(a[key], b[key]));
 
+const textEncoder = new TextEncoder();
+
 // Return image URL for podcast
-const coverArt = ({url}) => {
-  const src = hash.createHash('sha256').update(url).toString();
+const coverArt = async ({url}) => {
+  let src = textEncoder.encode(url.toString());
+  src = await crypto.subtle.digest('sha-256', src);
+  src = hex.encodeToString(new Uint8Array(src));
   return `/data/podcasts/${src}.webp`;
 };
 
@@ -32,8 +36,8 @@ export const songData = (song, artist, album, include_path = false) => {
     albumId: `album-${album.id}`,
     album: album.name,
     parent: `album-${album.id}`,
-    created: new Date(song.created_at || Date.now()).toISOString(),
-    modified: new Date(song.modified_at || Date.now()).toISOString(),
+    created: song.created_at.toISOString(),
+    modified: song.modified_at.toISOString(),
     duration: Math.round((song.duration ?? 0) / 1000),
     bitrate: Math.round((song.bitrate ?? 0) / 1000),
     size: song.size,
@@ -69,7 +73,7 @@ export const albumData = (album, artist, songs = false) => {
     artistId: `artist-${artist.id}`,
     artist: artist.name,
     parent: `artist-${artist.id}`,
-    created: new Date(album.created_at).toISOString(),
+    created: album.created_at.toISOString(),
     songCount: album.song_count,
     duration: Math.round(album.duration / 1000)
   };
@@ -94,20 +98,20 @@ export const artistData = (artist, albums = false) => {
 };
 
 // Convert `podcast` database entry to API data
-export const podcastData = (podcast) => {
+export const podcastData = async (podcast) => {
   return {
     id: `podcast-${podcast.id}`,
     url: podcast.url,
     name: podcast.name,
     title: podcast.name,
     episodeCount: podcast.episode_count,
-    modified: new Date(podcast.modified_at || Date.now()).toISOString(),
-    coverArt: coverArt(podcast)
+    modified: podcast.modified_at.toISOString(),
+    coverArt: await coverArt(podcast)
   };
 };
 
 // Convert `episode` database entry to API data
-export const episodeData = (episode, podcast) => {
+export const episodeData = async (episode, podcast) => {
   const data = songData(episode, podcast, podcast);
   data.id = data.id.replace('song', 'episode');
   data.stream = episode.url;
@@ -116,7 +120,7 @@ export const episodeData = (episode, podcast) => {
   data.albumId = `podcast-${String(podcast.id).replace(/[^\d]/g, '')}`;
   data.parent = data.albumId;
   data.type = 'episode';
-  data.coverArt = coverArt(podcast);
+  data.coverArt = await coverArt(podcast);
   return data;
 };
 
@@ -138,13 +142,15 @@ export const getPodcasts = async (id = 0, meta = false) => {
   id = isNaN(id) ? 0 : Number.parseInt(id, 10);
   meta = Boolean(meta);
   const podcasts = await sqlite.getPodcasts(id ? {key: 'id', value: id} : {});
-  const channel = podcasts.map(podcastData);
+  const channel = await Promise.all(podcasts.map(podcastData));
   if (id) {
     await Promise.all(
       channel.map(async (podcast) => {
         podcast.episode = await sqlite.getEpisodes({meta, podcast_id: id});
-        podcast.episode = podcast.episode.map((episode) =>
-          episodeData(episode, podcast)
+        podcast.episode = await Promise.all(
+          podcast.episode.map(
+            async (episode) => await episodeData(episode, podcast)
+          )
         );
       })
     );
@@ -227,7 +233,7 @@ export const getEpisode = async (id) => {
   const episode = await sqlite.getEpisodeBy('id', id);
   const podcast = await sqlite.getPodcastBy('id', episode.podcast_id);
   return {
-    episode: episodeData(episode, podcast)
+    episode: await episodeData(episode, podcast)
   };
 };
 
@@ -247,8 +253,8 @@ export const getBookmarks = async () => {
           username: 'admin',
           comment: bookmark.comment,
           position: bookmark.position,
-          created: new Date(bookmark.created_at).toISOString(),
-          changed: new Date(bookmark.modified_at).toISOString(),
+          created: bookmark.created_at.toISOString(),
+          changed: bookmark.modified_at.toISOString(),
           entry: [entry]
         };
         list.splice(i, 0, value);

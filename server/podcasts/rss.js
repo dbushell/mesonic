@@ -1,11 +1,13 @@
 // RSS
 import * as log from 'log';
 import * as path from 'path';
-import * as hash from 'hash';
+import * as hex from 'hex';
 import * as html from './html.js';
 import {PODCASTS, PODCASTS_IMAGE_AGE} from '../constants.js';
 
 const r_time = /(?:(\d+):)?(\d+):(\d+)/;
+
+const textEncoder = new TextEncoder();
 
 // Convert string to milliseconds
 export const parseTime = (str) => {
@@ -58,31 +60,32 @@ export const getValue = (tag, xml, fallback = '') =>
 export const getTitle = (xml) => html.decode(getValue('title', xml));
 
 // Return item data from RSS feed
-export const getEpisodes = (feed_url, xml) => {
+export const getEpisodes = async (feed_url, xml) => {
   let items = Array.from(xml.matchAll(r_items), (match) => match[0]);
-  items = items.map((item) => {
-    const url = (item.match(r_url) ?? [, ''])[1].trim();
-    if (url.length === 0) {
-      return false;
-    }
-    const name = getTitle(item);
-    const modified_at = new Date(getValue('pubDate', item)).getTime();
-    const duration = parseTime(getValue('itunes:duration', item));
-    let size = item.match(r_length);
-    size = size && !isNaN(size[1]) ? Number.parseInt(size[1], 10) : 0;
-    let path = hash
-      .createHash('sha256')
-      .update(feed_url + getValue('guid', item))
-      .toString();
-    return {
-      modified_at,
-      url,
-      name,
-      path,
-      duration,
-      size
-    };
-  });
+  items = await Promise.all(
+    items.map(async (item) => {
+      const url = (item.match(r_url) ?? [, ''])[1].trim();
+      if (url.length === 0) {
+        return false;
+      }
+      const name = getTitle(item);
+      const modified_at = new Date(getValue('pubDate', item));
+      const duration = parseTime(getValue('itunes:duration', item));
+      let size = item.match(r_length);
+      size = size && !isNaN(size[1]) ? Number.parseInt(size[1], 10) : 0;
+      let path = textEncoder.encode(feed_url + getValue('guid', item));
+      path = await crypto.subtle.digest('sha-256', path);
+      path = hex.encodeToString(new Uint8Array(path));
+      return {
+        modified_at,
+        url,
+        name,
+        path,
+        duration,
+        size
+      };
+    })
+  );
   return items.filter(Boolean);
 };
 
@@ -104,7 +107,9 @@ export const fetchFeed = async (url) => {
 // Fetch and save podcast image
 export const fetchImage = async (feed_url, xml) => {
   try {
-    let local = hash.createHash('sha256').update(feed_url.toString());
+    let local = textEncoder.encode(feed_url.toString());
+    local = await crypto.subtle.digest('sha-256', local);
+    local = hex.encodeToString(new Uint8Array(local));
     let remote = xml.match(r_image);
     if (!remote) {
       return;

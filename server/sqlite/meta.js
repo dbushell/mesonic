@@ -29,7 +29,7 @@ export const insertMeta = (data) => {
     sqlf(
       'INSERT OR REPLACE INTO `meta`\
       (`id`,`created_at`,`modified_at`,`entity_id`,`type`,`key`,`value`)\
-      VALUES (%s,%s,%d,%d,%s,%s,%s)',
+      VALUES (%s,%s,%s,%d,%s,%s,%s)',
       () =>
         sqlf(
           '(SELECT `id` FROM `meta` WHERE `entity_id`=%d AND `key`=%s)',
@@ -42,7 +42,7 @@ export const insertMeta = (data) => {
           data.entity_id,
           data.key
         ),
-      Date.now(),
+      new Date().toISOString(),
       data.entity_id,
       data.type,
       data.key,

@@ -8,7 +8,7 @@ import {PODCASTS_MAX_AGE} from '../constants.js';
 const findEpisode = async (item, episodes, podcast) => {
   let episode = episodes.find((episode) => episode.path === item.path);
   // Remove episodes older than one year
-  if (Date.now() - item.modified_at > PODCASTS_MAX_AGE) {
+  if (new Date() - item.modified_at > PODCASTS_MAX_AGE) {
     if (episode) {
       await sqlite.deleteEpisode({path: item.path});
     }
@@ -38,7 +38,7 @@ export const syncPodcast = async (podcast) => {
     const url = new URL(podcast.url);
     log.info(`Syncing: "${url}"`);
     const xml = await rss.fetchFeed(url);
-    const items = rss.getEpisodes(url, xml);
+    const items = await rss.getEpisodes(url, xml);
     let isUpdate = false;
     for (const item of items) {
       const episode = await findEpisode(item, episodes, podcast);
@@ -73,7 +73,7 @@ export const createPodcast = async (url) => {
   const name = rss.getTitle(xml);
   let podcasts = await sqlite.getPodcasts({key: 'url', value: url});
   if (podcasts.length) {
-    await sqlite.updatePodcast({...podcasts[0], created_at: Date.now(), name});
+    await sqlite.updatePodcast({...podcasts[0], name});
   } else {
     await sqlite.insertPodcast({url, name});
     podcasts = await sqlite.getPodcasts({key: 'url', value: url});

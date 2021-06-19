@@ -13,7 +13,7 @@ export const getBookmarks = async () => {
       await runQuery(
         'SELECT `bookmarks`.*\
         FROM `bookmarks`\
-        ORDER BY `bookmarks`.`modified_at` DESC\
+        ORDER BY datetime(`bookmarks`.`modified_at`) DESC\
         LIMIT 100'
       )
     );
@@ -38,14 +38,12 @@ export const insertBookmark = async (data) => {
   await execQuery(
     sqlf(
       'INSERT INTO `bookmarks`\
-      (`created_at`,`modified_at`,`entity_id`,`position`,`comment`,`type`)\
-      VALUES (%d,%d,%d,%d,%s,%s)',
-      Date.now(),
-      Date.now(),
+      (`entity_id`,`type`,`position`,`comment`)\
+      VALUES (%d,%s,%d,%s)',
       data.entity_id,
+      data.type,
       data.position,
-      data.comment,
-      data.type
+      data.comment
     )
   );
 };
