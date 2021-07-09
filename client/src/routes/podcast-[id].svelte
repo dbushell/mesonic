@@ -13,19 +13,22 @@
 
 <script>
   import {onDestroy} from 'svelte';
-  import {songStore, bookmarkStore} from '../stores.js';
+  import {serverStore, songStore, bookmarkStore} from '../stores.js';
   import {formatDate, formatTime} from '../utils.js';
   import Headphones from '../icons/headphones.svelte';
   import Check from '../icons/check.svelte';
 
   export let episodes = [];
 
+  let server;
   let song;
   let unsubscribe = [];
 
   onDestroy(() => {
     unsubscribe.forEach((fn) => fn());
   });
+
+  unsubscribe.push(serverStore.subscribe((value) => (server = value)));
 
   unsubscribe.push(
     songStore.subscribe((state) => {
@@ -74,7 +77,7 @@
         <div class="d-flex">
           <img
             alt={item.album}
-            src="/rest/getCoverArt.view?id={item.coverArt}"
+            src={new URL(`/rest/getCoverArt.view?id=${item.coverArt}`, server)}
             class="rounded me-2"
             width="40"
             height="40"

@@ -13,18 +13,25 @@
 
 <script>
   import {onDestroy} from 'svelte';
-  import {deleteBookmark, bookmarkStore} from '../stores.js';
+  import {serverStore, deleteBookmark, bookmarkStore} from '../stores.js';
   import {formatTime} from '../utils.js';
 
   export let bookmarks = [];
 
-  let unsubBookmarks;
+  let server;
+  let unsubscribe = [];
 
-  unsubBookmarks = bookmarkStore.subscribe((state) => {
-    bookmarks = state;
+  onDestroy(() => {
+    unsubscribe.forEach((fn) => fn());
   });
 
-  onDestroy(() => unsubBookmarks());
+  unsubscribe.push(serverStore.subscribe((value) => (server = value)));
+
+  unsubscribe.push(
+    bookmarkStore.subscribe((state) => {
+      bookmarks = state;
+    })
+  );
 
   const onSong = (nextSong) => {
     songStore.set({...nextSong});
@@ -50,7 +57,7 @@
           {#if item.entry[0].coverArt}
             <img
               alt={item.entry[0].title}
-              src="/rest/getCoverArt.view?id={item.entry[0].coverArt}"
+              src={new URL(`/rest/getCoverArt.view?id=${item.entry[0].coverArt}`, server)}
               class="d-inline-block align-top rounded me-1"
               width="24"
               height="24"

@@ -7,7 +7,7 @@ import {HEADERS} from './constants.js';
 
 await tasks.checkEnv();
 
-log.info('meSonic v0.17.3');
+log.info('meSonic v0.17.5');
 
 // Return the version
 if (Deno.args.includes('--version')) {

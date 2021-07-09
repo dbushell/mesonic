@@ -17,6 +17,7 @@
   import PlayButton from './play.svelte';
   import Atom from './atom.svelte';
 
+  let server;
   let audio;
   let song;
   let nextSong;
@@ -70,6 +71,8 @@
     resetAudio();
   });
 
+  unsubscribe.push(serverStore.subscribe((value) => (server = value)));
+
   unsubscribe.push(
     playbackStore.subscribe((playback) => {
       if ('rate' in playback) {
@@ -90,7 +93,7 @@
       }
       if (!newSong.stream) {
         const url = await addServerParams(
-          new URL(`/rest/stream.view?id=${newSong.id}`, $serverStore)
+          new URL(`/rest/stream.view?id=${newSong.id}`, server)
         );
         newSong.stream = url.href;
       }
@@ -220,7 +223,7 @@
         {#if song.coverArt}
           <img
             alt={song.title}
-            src="/rest/getCoverArt.view?id={song.coverArt}"
+            src={new URL(`/rest/getCoverArt.view?id=${song.coverArt}`, server)}
             class="d-inline-block align-top rounded me-1"
             width="24"
             height="24"

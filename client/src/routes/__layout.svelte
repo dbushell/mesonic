@@ -30,11 +30,17 @@
     if (prerendering) {
       await fetch('/demo/createBookmark.view');
       await fetch('/demo/deleteBookmark.view');
+      await fetch('/demo/getAlbum.view');
+      await fetch('/demo/getArtist.view');
+      await fetch('/demo/getArtists.view');
+      await fetch('/demo/getBookmarks.view');
+      await fetch('/demo/getPodcasts.view');
       await fetch('/demo/getScanStatus.view');
-      await fetch('/demo/startScan.view');
       await fetch('/demo/ping.view');
+      await fetch('/demo/startScan.view');
+    } else {
+      await fetchBookmarks({fetch});
     }
-    await fetchBookmarks({fetch});
 
     if (!browser) {
       return {};
