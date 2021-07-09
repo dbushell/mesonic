@@ -1,12 +1,8 @@
 <script context="module">
-  import {prerendering} from '$app/env';
   import {fetchEpisodes} from '../stores.js';
 
   export const load = async ({fetch, page}) => {
-    const props = {id: page.params.id};
-    if (prerendering) {
-      props.fetch = fetch;
-    }
+    const props = {fetch, id: page.params.id};
     return {
       props: {
         episodes: await fetchEpisodes(props)
@@ -78,7 +74,7 @@
         <div class="d-flex">
           <img
             alt={item.album}
-            src={item.coverArt}
+            src="/rest/getCoverArt.view?id={item.coverArt}"
             class="rounded me-2"
             width="40"
             height="40"

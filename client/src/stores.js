@@ -95,7 +95,7 @@ export const fetchProps = async (url, data = {}, server = null) => {
 export const updateServer = async (server) => {
   try {
     const [url, props] = await fetchProps('/rest/ping.view', server);
-    const response = await fetch(url, props);
+    const response = await fetch(url.href, props);
     const json = await response.json();
     if (json['subsonic-response'].status === 'ok') {
       songStore.set(null);
@@ -109,11 +109,10 @@ export const updateServer = async (server) => {
 };
 
 export const fetchPodcasts = async ({fetch} = {}) => {
+  fetch = fetch || globalThis.fetch;
   try {
     const [url, props] = await fetchProps('/rest/getPodcasts.view');
-    const response = await (fetch
-      ? fetch(url.pathname)
-      : globalThis.fetch(url, props));
+    const response = await fetch(url.href, props);
     const json = await response.json();
     const podcasts = json['subsonic-response']?.podcasts;
     return podcasts.channel;
@@ -130,9 +129,7 @@ export const fetchEpisodes = async ({fetch, id}) => {
       includeMeta: true,
       includeEpisodes: true
     });
-    const response = await (fetch
-      ? fetch(url.pathname)
-      : globalThis.fetch(url, props));
+    const response = await fetch(url.href, props);
     const json = await response.json();
     const podcast = json['subsonic-response']?.podcasts?.channel[0];
     podcastStore.set(podcast);
@@ -144,15 +141,16 @@ export const fetchEpisodes = async ({fetch, id}) => {
 };
 
 export const fetchArtists = async ({fetch} = {}) => {
+  fetch = fetch || globalThis.fetch;
   let artists = [];
   try {
     const [url, props] = await fetchProps('/rest/getArtists.view');
-    const response = await (fetch
-      ? fetch(url.pathname)
-      : globalThis.fetch(url, props));
+    const response = await fetch(url.href, props);
     const json = await response.json();
     const index = json['subsonic-response']?.artists?.index;
-    index.forEach((list) => artists.push(...list.artist));
+    index.forEach((list) =>
+      artists.push(...list.artist.filter((artist) => artist.albumCount > 0))
+    );
   } catch (err) {
     console.log(err);
     artists = [];
@@ -163,13 +161,11 @@ export const fetchArtists = async ({fetch} = {}) => {
 export const fetchAlbums = async ({fetch, id}) => {
   try {
     const [url, props] = await fetchProps('/rest/getArtist.view', {id});
-    const response = await (fetch
-      ? fetch(url.pathname)
-      : globalThis.fetch(url, props));
+    const response = await fetch(url.href, props);
     const json = await response.json();
     const artist = json['subsonic-response']?.artist;
     artistStore.set(artist);
-    return artist.album;
+    return artist.album.filter((album) => album.songCount > 0);
   } catch (err) {
     console.log(err);
     return [];
@@ -179,9 +175,7 @@ export const fetchAlbums = async ({fetch, id}) => {
 export const fetchSongs = async ({fetch, id}) => {
   try {
     const [url, props] = await fetchProps('/rest/getAlbum.view', {id});
-    const response = await (fetch
-      ? fetch(url.pathname)
-      : globalThis.fetch(url, props));
+    const response = await fetch(url.href, props);
     const json = await response.json();
     const album = json['subsonic-response']?.album;
     albumStore.set(album);
@@ -193,11 +187,10 @@ export const fetchSongs = async ({fetch, id}) => {
 };
 
 export const fetchBookmarks = async ({fetch} = {}) => {
+  fetch = fetch || globalThis.fetch;
   try {
     const [url, props] = await fetchProps('/rest/getBookmarks.view');
-    const response = await (fetch
-      ? fetch(url.pathname)
-      : globalThis.fetch(url, props));
+    const response = await fetch(url.href, props);
     const json = await response.json();
     const items = json['subsonic-response']?.bookmarks?.bookmark;
     if (Array.isArray(items)) {
@@ -222,7 +215,7 @@ export const createBookmark = async ({id, position}) => {
       position,
       comment: navigator.userAgent
     });
-    const response = await fetch(url, props);
+    const response = await fetch(url.href, props);
     const json = await response.json();
     const {status, error} = json['subsonic-response'];
     if (status !== 'ok') {
@@ -238,7 +231,7 @@ export const createBookmark = async ({id, position}) => {
 export const deleteBookmark = async ({id}) => {
   try {
     const [url, props] = await fetchProps('/rest/deleteBookmark.view', {id});
-    const response = await fetch(url, props);
+    const response = await fetch(url.href, props);
     const json = await response.json();
     const {status, error} = json['subsonic-response'];
     if (status !== 'ok') {
@@ -256,7 +249,7 @@ export const createPodcast = async (data) => {
     const [url, props] = await fetchProps('/rest/createPodcastChannel.view', {
       url: data.url
     });
-    const response = await fetch(url, props);
+    const response = await fetch(url.href, props);
     const json = await response.json();
     const {status, error} = json['subsonic-response'];
     if (status !== 'ok') {
@@ -274,7 +267,7 @@ export const deletePodcast = async ({id}) => {
     const [url, props] = await fetchProps('/rest/deletePodcastChannel.view', {
       id
     });
-    const response = await fetch(url, props);
+    const response = await fetch(url.href, props);
     const json = await response.json();
     const {status, error} = json['subsonic-response'];
     if (status !== 'ok') {
@@ -296,7 +289,7 @@ export const getScanStatus = async (isStart = true) => {
     const [url, props] = await fetchProps(
       `/rest/${isStart ? 'startScan' : 'getScanStatus'}.view`
     );
-    const response = await fetch(url, props);
+    const response = await fetch(url.href, props);
     const json = await response.json();
     const {status, scanStatus, error} = json['subsonic-response'];
     if (status !== 'ok') {
@@ -326,7 +319,7 @@ export const nextSongStore = derived(
       const [url, props] = await fetchProps('/rest/getAlbum.view', {
         id: $songStore.albumId
       });
-      const response = await fetch(url, props);
+      const response = await fetch(url.href, props);
       const json = await response.json();
       const songs = json['subsonic-response']?.album?.song;
       if (songs.length > 1) {

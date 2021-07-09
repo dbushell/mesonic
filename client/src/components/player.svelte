@@ -220,7 +220,7 @@
         {#if song.coverArt}
           <img
             alt={song.title}
-            src={song.coverArt}
+            src="/rest/getCoverArt.view?id={song.coverArt}"
             class="d-inline-block align-top rounded me-1"
             width="24"
             height="24"

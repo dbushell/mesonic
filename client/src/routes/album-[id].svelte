@@ -1,12 +1,8 @@
 <script context="module">
-  import {prerendering} from '$app/env';
   import {fetchSongs} from '../stores.js';
 
   export const load = async ({fetch, page}) => {
-    const props = {id: page.params.id};
-    if (prerendering) {
-      props.fetch = fetch;
-    }
+    const props = {fetch, id: page.params.id};
     return {
       props: {
         songs: await fetchSongs(props)

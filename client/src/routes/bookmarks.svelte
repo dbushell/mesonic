@@ -1,12 +1,8 @@
 <script context="module">
-  import {prerendering} from '$app/env';
   import {songStore, fetchBookmarks} from '../stores.js';
 
   export const load = async ({fetch}) => {
-    const props = {};
-    if (prerendering) {
-      props.fetch = fetch;
-    }
+    const props = {fetch};
     return {
       props: {
         bookmarks: await fetchBookmarks(props)
@@ -54,7 +50,7 @@
           {#if item.entry[0].coverArt}
             <img
               alt={item.entry[0].title}
-              src={item.entry[0].coverArt}
+              src="/rest/getCoverArt.view?id={item.entry[0].coverArt}"
               class="d-inline-block align-top rounded me-1"
               width="24"
               height="24"

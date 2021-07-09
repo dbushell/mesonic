@@ -1,6 +1,6 @@
 {
   "name": "mesonic",
-  "version": "0.17.0",
+  "version": "0.17.3",
   "private": true,
   "scripts": {
     "dev": "npx svelte-kit dev",
@@ -12,8 +12,8 @@
     "@sveltejs/adapter-static": "next",
     "@sveltejs/kit": "next",
     "cookie": "^0.4.1",
-    "svelte": "^3.38.2",
-    "vite": "^2.3.5"
+    "svelte": "^3.38.3",
+    "vite": "^2.4.1"
   },
   "type": "module"
 }

@@ -1,12 +1,8 @@
 <script context="module">
-  import {prerendering} from '$app/env';
   import {fetchArtists} from '../stores.js';
 
   export const load = async ({fetch}) => {
-    const props = {};
-    if (prerendering) {
-      props.fetch = fetch;
-    }
+    const props = {fetch};
     return {
       props: {
         artists: await fetchArtists(props)

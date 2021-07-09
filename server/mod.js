@@ -7,7 +7,7 @@ import {HEADERS} from './constants.js';
 
 await tasks.checkEnv();
 
-log.info('meSonic v0.17.0');
+log.info('meSonic v0.17.3');
 
 // Return the version
 if (Deno.args.includes('--version')) {
@@ -195,6 +195,22 @@ const getResponse = async (request) => {
       return {
         status: 'failed',
         error: {code: 70, message: 'Song not found'}
+      };
+    }
+  }
+  // Redirect cover art to be handled by Caddy server
+  if (pathname === '/rest/getCoverArt.view') {
+    try {
+      const id = form.get('id');
+      if (/^\/data\//.test(id)) {
+        return new Response('', {status: 307, headers: {location: id}});
+      }
+      throw new Error();
+    } catch (err) {
+      log.warning(err);
+      return {
+        status: 'failed',
+        error: {code: 70, message: 'Cover art not found'}
       };
     }
   }

@@ -33,10 +33,8 @@
       await fetch('/demo/getScanStatus.view');
       await fetch('/demo/startScan.view');
       await fetch('/demo/ping.view');
-      await fetchBookmarks({fetch});
-    } else {
-      await fetchBookmarks();
     }
+    await fetchBookmarks({fetch});
 
     if (!browser) {
       return {};
