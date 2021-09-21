@@ -14,12 +14,15 @@ const naturalSort = (item, key = 'name') =>
   item.sort((a, b) => naturalCollator.compare(a[key], b[key]));
 
 const textEncoder = new TextEncoder();
+const textDecoder = new TextDecoder();
 
 // Return image URL for podcast
 const coverArt = async ({url}) => {
   let src = textEncoder.encode(url.toString());
   src = await crypto.subtle.digest('sha-256', src);
-  src = hex.encodeToString(new Uint8Array(src));
+  // src = hex.encodeToString(new Uint8Array(src));
+  src = textDecoder.decode(hex.encode(new Uint8Array(src)));
+
   return `/data/podcasts/${src}.webp`;
 };
 

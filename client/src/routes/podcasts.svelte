@@ -52,7 +52,7 @@
         <img
           alt={item.title}
           src={new URL(`/rest/getCoverArt.view?id=${item.coverArt}`, server)}
-          class="rounded me-2"
+          class="rounded overflow-hidden flex-shrink-0 me-2"
           width="40"
           height="40"
           loading="lazy"

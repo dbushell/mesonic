@@ -3,10 +3,11 @@
   import {browser, prerendering} from '$app/env';
   import {
     fetchBookmarks,
-    serverStore,
+    playbackStore,
     proxyStore,
-    playbackStore
+    serverStore
   } from '../stores.js';
+  import {loadIndexedDB} from '../offline.js';
 
   export const load = async ({fetch, session}) => {
     let server;
@@ -73,6 +74,8 @@
       globalThis.localStorage.setItem('playback', JSON.stringify(playback));
     });
 
+    loadIndexedDB();
+
     return {};
   };
 </script>
@@ -86,8 +89,9 @@
   import {songStore} from '../stores.js';
 
   const heading = `meSonic`;
-  let title = heading;
+  let title;
   $: {
+    title = heading;
     if ($songStore) {
       const songName = $songStore.name;
       const albumName = $songStore.album;

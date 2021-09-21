@@ -5,12 +5,15 @@
     nextSongStore,
     bookmarkStore,
     playbackStore,
+    offlineStore,
     serverStore,
     addServerParams,
     createBookmark,
     deleteBookmark
   } from '../stores.js';
+  import {getOffline, deleteOffline} from '../offline.js';
   import {formatTime} from '../utils.js';
+  import Wifioff from '../icons/wifioff.svelte';
   import RewindButton from './rewind.svelte';
   import ForwardButton from './forward.svelte';
   import PauseButton from './pause.svelte';
@@ -21,12 +24,14 @@
   let audio;
   let song;
   let nextSong;
+  let cached = [];
   let bookmarks = [];
   let bookmarkInterval;
   let seekingTimeout;
   let seekTimeout;
   let onLoadedPosition = 0;
   let playbackRate = 1.0;
+  let isOffline = false;
   let isPlaying = false;
   let isSeeking = false;
   let isLoaded = false;
@@ -75,6 +80,7 @@
 
   unsubscribe.push(
     playbackStore.subscribe((playback) => {
+      isOffline = Boolean(playback?.isOffline);
       if ('rate' in playback) {
         playbackRate = Number.parseFloat(playback.rate);
         if (audio) {
@@ -85,11 +91,23 @@
   );
 
   unsubscribe.push(
+    offlineStore.subscribe((state) => {
+      cached = state.cached;
+    })
+  );
+
+  unsubscribe.push(
     songStore.subscribe(async (newSong) => {
       if (!newSong) {
         song = null;
         resetAudio();
         return;
+      }
+      if (cached?.includes(newSong.id)) {
+        const blob = await getOffline(newSong);
+        if (blob) {
+          newSong.stream = URL.createObjectURL(blob);
+        }
       }
       if (!newSong.stream) {
         const url = await addServerParams(
@@ -97,10 +115,18 @@
         );
         newSong.stream = url.href;
       }
+      if (isOffline && !newSong.stream.startsWith('blob:')) {
+        alert('Cannot play in offline mode');
+        songStore.set(null);
+        return;
+      }
       if (song) {
         if (song.id !== newSong.id) {
           if (isPlaying) {
             setBookmark();
+          }
+          if (song.stream.startsWith('blob:')) {
+            URL.revokeObjectURL(song.stream);
           }
           song = newSong;
           resetAudio();
@@ -188,6 +214,7 @@
   const onEnded = () => {
     isPlaying = false;
     deleteBookmark(song);
+    deleteOffline(song);
     if (nextSong) {
       songStore.set({...nextSong, autoplay: true});
     }
@@ -224,7 +251,7 @@
           <img
             alt={song.title}
             src={new URL(`/rest/getCoverArt.view?id=${song.coverArt}`, server)}
-            class="d-inline-block align-top rounded me-1"
+            class="d-inline-block align-top rounded overflow-hidden me-1"
             width="24"
             height="24"
             loading="lazy"
@@ -235,6 +262,7 @@
             <span class="visually-hidden">Loading…</span>
           </span>
         {/if}
+        {#if isOffline}<Wifioff />{/if}
         <span>{song.title}</span>
       </p>
       <div class="d-flex flex-wrap">
@@ -246,7 +274,14 @@
         </a>
       </div>
     {:else}
-      <p class="h6 lh-base m-0 text-dark">Not playing…</p>
+      <p class="h6 lh-base m-0 text-dark">
+        {#if isOffline}
+          <Wifioff />
+          <span>Offline mode…</span>
+        {:else}
+          <span>Not playing…</span>
+        {/if}
+      </p>
     {/if}
   </div>
   <div

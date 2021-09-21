@@ -2,10 +2,12 @@ import {writable, derived, get} from 'svelte/store';
 import {prerendering} from '$app/env';
 import {md5} from './utils.js';
 
+export const offlineStore = writable({db: null, cached: [], downloads: {}});
 export const proxyStore = writable();
 export const serverStore = writable();
+export const appStore = writable({isMesonic: false});
 export const authStore = writable({username: '', password: ''});
-export const playbackStore = writable({rate: '1.0'});
+export const playbackStore = writable({rate: '1.0', isOffline: false});
 export const podcastStore = writable();
 export const artistStore = writable();
 export const albumStore = writable();
@@ -193,6 +195,12 @@ export const fetchBookmarks = async ({fetch} = {}) => {
     const [url, props] = await fetchProps('/rest/getBookmarks.view');
     const response = await fetch(prerendering ? url.pathname : url.href, props);
     const json = await response.json();
+    if (json['subsonic-response']?.mesonic?.version) {
+      appStore.set({
+        ...get(appStore),
+        isMesonic: true
+      });
+    }
     const items = json['subsonic-response']?.bookmarks?.bookmark;
     if (Array.isArray(items)) {
       items.forEach((bookmark) => {

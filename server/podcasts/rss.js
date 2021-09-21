@@ -8,6 +8,7 @@ import {PODCASTS, PODCASTS_IMAGE_AGE} from '../constants.js';
 const r_time = /(?:(\d+):)?(\d+):(\d+)/;
 
 const textEncoder = new TextEncoder();
+const textDecoder = new TextDecoder();
 
 // Convert string to milliseconds
 export const parseTime = (str) => {
@@ -75,7 +76,9 @@ export const getEpisodes = async (feed_url, xml) => {
       size = size && !isNaN(size[1]) ? Number.parseInt(size[1], 10) : 0;
       let path = textEncoder.encode(feed_url + getValue('guid', item));
       path = await crypto.subtle.digest('sha-256', path);
-      path = hex.encodeToString(new Uint8Array(path));
+      // path = hex.encodeToString(new Uint8Array(path));
+      path = textDecoder.decode(hex.encode(new Uint8Array(path)));
+
       return {
         modified_at,
         url,
@@ -109,7 +112,9 @@ export const fetchImage = async (feed_url, xml) => {
   try {
     let local = textEncoder.encode(feed_url.toString());
     local = await crypto.subtle.digest('sha-256', local);
-    local = hex.encodeToString(new Uint8Array(local));
+    // local = hex.encodeToString(new Uint8Array(local));
+    local = textDecoder.decode(hex.encode(new Uint8Array(local)));
+
     let remote = xml.match(r_image);
     if (!remote) {
       return;

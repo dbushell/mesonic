@@ -3,11 +3,12 @@ import * as log from 'log';
 import * as path from 'path';
 import * as api from './api.js';
 import * as tasks from './tasks.js';
-import {HEADERS} from './constants.js';
+import {VER, HEADERS} from './constants.js';
+import {fetchPodcast} from './podcasts/mod.js';
 
 await tasks.checkEnv();
 
-log.info('meSonic v0.17.5');
+log.info(`meSonic v${VER}`);
 
 // Return the version
 if (Deno.args.includes('--version')) {
@@ -48,6 +49,16 @@ const getResponse = async (request) => {
     return;
   }
   const {pathname} = new URL(request.url);
+  // CORs proxy to save offline browser cache
+  try {
+    const proxy = '/rest/proxy/';
+    if (pathname.startsWith(proxy)) {
+      const url = new URL(pathname.slice(proxy.length));
+      return await fetchPodcast(url);
+    }
+  } catch (err) {
+    console.log(err);
+  }
   const form = await getRequestData(request);
   if (pathname === '/rest/test.view') {
     const data = {};
@@ -246,9 +257,20 @@ const onConn = async (conn) => {
     const type = request.headers.get('content-type')?.match(/[\w]+\/([\w-]+)/);
     log.debug(`${request.method}${type ? ` [${type[1]}]` : ''} ${request.url}`);
     // Get JSON response or immediately return
-    const body = await getResponse(request);
-    if (body instanceof Response) {
-      respondWith(body);
+    let after;
+    let response = await getResponse(request);
+    if (Array.isArray(response)) {
+      after = response[1];
+      response = response[0];
+    }
+    if (response instanceof Response) {
+      respondWith(response)
+        .catch(log.error)
+        .finally(() => {
+          if (typeof after === 'function') {
+            after();
+          }
+        });
       continue;
     }
     // Wrap body is Subsonic response
@@ -258,7 +280,10 @@ const onConn = async (conn) => {
           'subsonic-response': {
             status: 'ok',
             version: '1.16.0',
-            ...body
+            mesonic: {
+              version: VER
+            },
+            ...response
           }
         }),
         {

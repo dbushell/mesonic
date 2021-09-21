@@ -80,3 +80,29 @@ export const createPodcast = async (url) => {
   }
   await syncPodcast(podcasts[0]);
 };
+
+// Return and abortable fetch response
+export const fetchPodcast = async (url) => {
+  const controller = new AbortController();
+  const response = await fetch(url, {signal: controller.signal});
+  if (!response.ok) {
+    return new Response(null, {status: 404});
+  }
+  const type = response.headers.get('content-type');
+  const length = response.headers.get('content-length');
+  if (!type.startsWith('audio/')) {
+    return new Response(null, {status: 404});
+  }
+  return [
+    new Response(response.body, {
+      headers: {
+        'access-control-allow-origin': '*',
+        'content-length': length,
+        'content-type': type
+      }
+    }),
+    () => {
+      controller.abort();
+    }
+  ];
+};

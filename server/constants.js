@@ -1,6 +1,9 @@
 // Constants
 import * as path from 'path';
 
+// Version string
+export const VER = '0.18.3';
+
 // Development mode
 export const DEV = Number(Deno.env.get('MESONIC_DEV')) === 1;
 

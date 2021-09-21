@@ -13,13 +13,28 @@
 
 <script>
   import {onDestroy} from 'svelte';
-  import {serverStore, deleteBookmark, bookmarkStore} from '../stores.js';
+  import {
+    addServerParams,
+    appStore,
+    bookmarkStore,
+    deleteBookmark,
+    offlineStore,
+    playbackStore,
+    serverStore
+  } from '../stores.js';
+  import {addOffline, deleteOffline} from '../offline.js';
   import {formatTime} from '../utils.js';
+  import Download from '../icons/download.svelte';
+  import Trash from '../icons/trash.svelte';
 
   export let bookmarks = [];
 
   let server;
+  let cached = [];
+  let downloads = {};
   let unsubscribe = [];
+  let isOffline = false;
+  let isMesonic = false;
 
   onDestroy(() => {
     unsubscribe.forEach((fn) => fn());
@@ -28,19 +43,57 @@
   unsubscribe.push(serverStore.subscribe((value) => (server = value)));
 
   unsubscribe.push(
+    appStore.subscribe((state) => {
+      isMesonic = Boolean(state.isMesonic);
+    })
+  );
+
+  unsubscribe.push(
     bookmarkStore.subscribe((state) => {
       bookmarks = state;
     })
   );
 
-  const onSong = (nextSong) => {
-    songStore.set({...nextSong});
+  unsubscribe.push(
+    playbackStore.subscribe((playback) => {
+      isOffline = Boolean(playback?.isOffline);
+    })
+  );
+
+  unsubscribe.push(
+    offlineStore.subscribe((state) => {
+      cached = state.cached;
+      downloads = state.downloads;
+    })
+  );
+
+  const onSong = async (song) => {
+    songStore.set({...song});
   };
 
   const onDelete = async (song) => {
     if (window.confirm('Delete bookmark?')) {
       deleteBookmark(song);
+      deleteOffline(song);
     }
+  };
+
+  const onOffline = async (ev, song) => {
+    const button = ev.target.closest('button');
+    if (button) {
+      button.disabled = true;
+      button.blur();
+    }
+    const url = song.stream
+      ? new URL(song.stream)
+      : await addServerParams(
+          new URL(`/rest/stream.view?id=${song.id}`, server)
+        );
+    addOffline({id: song.id, url});
+  };
+
+  const onDeleteOffline = async (song) => {
+    deleteOffline(song);
   };
 </script>
 
@@ -57,8 +110,11 @@
           {#if item.entry[0].coverArt}
             <img
               alt={item.entry[0].title}
-              src={new URL(`/rest/getCoverArt.view?id=${item.entry[0].coverArt}`, server)}
-              class="d-inline-block align-top rounded me-1"
+              src={new URL(
+                `/rest/getCoverArt.view?id=${item.entry[0].coverArt}`,
+                server
+              )}
+              class="d-inline-block align-top rounded overflow-hidden me-1"
               width="24"
               height="24"
               loading="lazy"
@@ -78,6 +134,28 @@
             </a>
           </p>
           <div class="d-flex mt-2 mb-1">
+            {#if isMesonic}
+              {#if cached?.includes(item.entry[0].id)}
+                <button
+                  on:click={() => onDeleteOffline({...item.entry[0]})}
+                  class="btn me-2 btn-sm btn-outline-dark"
+                  aria-label="remove offline download"
+                  type="button"
+                >
+                  <Trash />
+                </button>
+              {:else}
+                <button
+                  on:click={(ev) => onOffline(ev, {...item.entry[0]})}
+                  disabled={isOffline || Object.keys(downloads).includes(item.entry[0].id)}
+                  class="btn me-2 btn-sm btn-outline-secondary"
+                  aria-label="download for offline play"
+                  type="button"
+                >
+                  <Download />
+                </button>
+              {/if}
+            {/if}
             <button
               on:click={() => onSong({...item.entry[0], autoplay: true})}
               class="btn me-2 btn-sm btn-outline-success"
@@ -94,6 +172,18 @@
             </button>
           </div>
         </div>
+        {#if Object.keys(downloads).includes(item.entry[0].id)}
+          <div class="progress w-100 my-2" style="height: 0.125rem;">
+            <div
+              class="progress-bar bg-secondary"
+              role="progressbar"
+              style="width: {downloads[item.entry[0].id].progress}%;"
+              aria-valuenow={Math.round(downloads[item.entry[0].id].progress)}
+              aria-valuemin="0"
+              aria-valuemax="100"
+            />
+          </div>
+        {/if}
         {#if item.progress}
           <div class="progress w-100 my-2" style="height: 0.125rem;">
             <div

@@ -2,6 +2,7 @@
   import {goto} from '$app/navigation';
   import {onDestroy} from 'svelte';
   import {
+    appStore,
     authStore,
     serverStore,
     playbackStore,
@@ -11,6 +12,8 @@
   } from '../stores.js';
 
   let rate;
+  let isMesonic = false;
+  let isOffline = false;
   let isError = false;
   let scan = {};
   const unsubscribe = [];
@@ -20,8 +23,15 @@
   });
 
   unsubscribe.push(
+    appStore.subscribe((state) => {
+      isMesonic = Boolean(state.isMesonic);
+    })
+  );
+
+  unsubscribe.push(
     playbackStore.subscribe((state) => {
       rate = state.rate;
+      isOffline = Boolean(state.isOffline);
     })
   );
 
@@ -40,6 +50,13 @@
     playbackStore.set({
       ...$playbackStore,
       rate: String(ev.target.value).padEnd(3, '.0')
+    });
+  };
+
+  const onOfflineChange = (ev) => {
+    playbackStore.set({
+      ...$playbackStore,
+      isOffline: Boolean(ev.target.checked)
     });
   };
 
@@ -90,6 +107,26 @@
   on:change={onRateChange}
   on:input={onRateChange}
 />
+{#if isMesonic}
+  <div class="mt-4 pt-4 border-top">
+    <div class="form-check form-switch">
+      <input
+        type="checkbox"
+        class="form-check-input"
+        id="playback-offline"
+        checked={isOffline}
+        on:input={onOfflineChange}
+      />
+      <label
+        class="form-check-label"
+        class:text-primary={isOffline}
+        for="playback-offline"
+      >
+        Offline mode
+      </label>
+    </div>
+  </div>
+{/if}
 <form on:submit={onSettings} method="POST" class="mt-4 pt-4 border-top">
   <div class="mb-3">
     <label
