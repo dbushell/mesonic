@@ -2,7 +2,7 @@
 import * as path from 'path';
 
 // Version string
-export const VER = '0.18.3';
+export const VER = '0.18.5';
 
 // Development mode
 export const DEV = Number(Deno.env.get('MESONIC_DEV')) === 1;

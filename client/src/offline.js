@@ -1,6 +1,7 @@
 import {get} from 'svelte/store';
 import {offlineStore, serverStore} from './stores.js';
 
+/*
 // https://bugs.webkit.org/show_bug.cgi?id=226547#c28
 async function workaroundSafariBug() {
   const isSafari =
@@ -15,9 +16,10 @@ async function workaroundSafariBug() {
   });
   clearInterval(intervalId);
 }
+*/
 
 export const loadIndexedDB = async () => {
-  await workaroundSafariBug();
+  // await workaroundSafariBug();
   const open = globalThis.indexedDB.open('mesonic', 1);
   open.addEventListener('upgradeneeded', (ev) => {
     ev.target.result.createObjectStore('downloads');
