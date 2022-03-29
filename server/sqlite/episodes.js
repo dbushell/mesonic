@@ -28,6 +28,7 @@ export const getEpisodes = async ({podcast_id, meta, key, value}) => {
       return [];
     }
     const episodes = await csv.parse(data, parseOptions);
+    episodes.map(parseOptions.parse);
     if (meta) {
       const meta_map = {};
       const ids = episodes.map((episode) => episode.id);

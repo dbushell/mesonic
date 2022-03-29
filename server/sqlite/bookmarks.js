@@ -20,7 +20,7 @@ export const getBookmarks = async () => {
     if (!data.trim()) {
       return [];
     }
-    return await csv.parse(data, parseOptions);
+    return (await csv.parse(data, parseOptions)).map(parseOptions.parse);
   } catch (err) {
     log.error(err);
     return [];

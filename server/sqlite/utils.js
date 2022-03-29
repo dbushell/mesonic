@@ -4,6 +4,8 @@ import {sprintf} from 'printf';
 // CSV parsing options
 export const parseOptions = {
   skipFirstRow: true,
+  // Option removed now requires extra mapping
+  // https://github.com/denoland/deno_std/issues/881
   parse: (item) => {
     for (const [key, value] of Object.entries(item)) {
       if (/_at$/.test(key)) {
