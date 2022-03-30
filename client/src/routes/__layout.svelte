@@ -27,6 +27,8 @@
       serverStore.set(new URL(session.server));
     }
 
+    console.log(session);
+
     // Ensure all demo endpoints are prerendered
     if (prerendering) {
       await fetch('/demo/createBookmark.view');
@@ -108,9 +110,9 @@
   let isSettings;
 
   $: {
-    isBookmarks = /^\/bookmarks/.test($page.path);
-    isPodcasts = /^\/podcast/.test($page.path);
-    isSettings = /^\/settings/.test($page.path);
+    isBookmarks = /^\/bookmarks/.test($page.url.pathname);
+    isPodcasts = /^\/podcast/.test($page.url.pathname);
+    isSettings = /^\/settings/.test($page.url.pathname);
     isBrowse = !(isPodcasts || isBookmarks || isSettings);
   }
 </script>

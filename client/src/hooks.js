@@ -5,7 +5,7 @@ const {MESONIC_CONFIG, MESONIC_HOST} = process.env;
 // Internal Docker proxy server for Deno API
 const MESONIC_PROXY = 'http://localhost:4040';
 
-export const getSession = async (request) => {
+export const getSession = async ({request}) => {
   // Default to either env variable or internal server
   let server = new URL(MESONIC_HOST || MESONIC_PROXY);
   // Use SvelteKit endpoints for static demo

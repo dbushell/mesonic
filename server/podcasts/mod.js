@@ -38,6 +38,10 @@ export const syncPodcast = async (podcast) => {
     const url = new URL(podcast.url);
     log.info(`Syncing: "${url}"`);
     const xml = await rss.fetchFeed(url);
+    if (!xml) {
+      log.warning(`Sync failed: "${url}"`);
+      return;
+    }
     const items = await rss.getEpisodes(url, xml);
     let isUpdate = false;
     for (const item of items) {

@@ -105,6 +105,7 @@ export const fetchFeed = async (url) => {
   } catch (err) {
     log.warning(`Failed to fetch: "${url}"`);
   }
+  return false;
 };
 
 // Fetch and save podcast image

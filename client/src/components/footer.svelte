@@ -9,7 +9,7 @@
   aria-label="information"
 >
   <p class="text-dark text-center text-nowrap d-inline-flex m-0">
-    <span>v0.19.0 &nbsp;|&nbsp; © {year}</span>
+    <span>v0.19.3 &nbsp;|&nbsp; © {year}</span>
     <a href="https://dbushell.com/" class="text-dark mx-2" target="_blank">
       David Bushell
     </a>

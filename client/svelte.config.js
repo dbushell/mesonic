@@ -11,15 +11,14 @@ if ('MESONIC_CONFIG' in process.env) {
 
 const config = {
   kit: {
-    vite: {
+    vite: () => ({
       server: {
         hmr: {
           host: 'localhost',
           port: 12080
         }
       }
-    },
-    target: '#svelte',
+    }),
     adapter: adapter()
   }
 };
