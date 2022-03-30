@@ -1,8 +1,8 @@
 <script context="module">
   import {fetchAlbums} from '../stores.js';
 
-  export const load = async ({fetch, page}) => {
-    const props = {fetch, id: page.params.id};
+  export const load = async ({fetch, params}) => {
+    const props = {fetch, id: params.id};
     return {
       props: {
         albums: await fetchAlbums(props)
