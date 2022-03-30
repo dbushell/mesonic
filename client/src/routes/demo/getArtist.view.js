@@ -1,4 +1,4 @@
-export const post = async ({request}) => get(request);
+export const post = async (ev) => get(ev);
 
 export const get = async () => {
   return {
