@@ -9,15 +9,20 @@
   } from '../stores.js';
   import {loadIndexedDB} from '../offline.js';
 
-  export const load = async ({fetch, session}) => {
+  export const load = async (loadProps) => {
+    const {fetch} = loadProps;
     let server;
     if (browser) {
       server = globalThis.localStorage.getItem('server');
+    }
+    if (prerendering) {
+      server = new URL('/demo/', process.env.MESONIC_HOST);
     }
     if (server) {
       // Use server from browser storage
       serverStore.set(new URL(server));
     } else {
+      const {session} = loadProps;
       proxyStore.set(null);
       // Use internal proxy for SSR
       if (!browser && session.proxy) {
@@ -25,9 +30,8 @@
       }
       // Use default or cookie defined server
       serverStore.set(new URL(session.server));
+      console.log(session);
     }
-
-    console.log(session);
 
     // Ensure all demo endpoints are prerendered
     if (prerendering) {

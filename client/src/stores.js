@@ -115,7 +115,7 @@ export const fetchPodcasts = async ({fetch} = {}) => {
   fetch = fetch || globalThis.fetch;
   try {
     const [url, props] = await fetchProps('/rest/getPodcasts.view');
-    const response = await fetch(prerendering ? url.pathname : url.href, props);
+    const response = await fetch(url.href, props);
     const json = await response.json();
     const podcasts = json['subsonic-response']?.podcasts;
     return podcasts.channel;
@@ -132,7 +132,7 @@ export const fetchEpisodes = async ({fetch, id}) => {
       includeMeta: true,
       includeEpisodes: true
     });
-    const response = await fetch(prerendering ? url.pathname : url.href, props);
+    const response = await fetch(url.href, props);
     const json = await response.json();
     const podcast = json['subsonic-response']?.podcasts?.channel[0];
     podcastStore.set(podcast);
@@ -148,7 +148,7 @@ export const fetchArtists = async ({fetch} = {}) => {
   let artists = [];
   try {
     const [url, props] = await fetchProps('/rest/getArtists.view');
-    const response = await fetch(prerendering ? url.pathname : url.href, props);
+    const response = await fetch(url.href, props);
     const json = await response.json();
     const index = json['subsonic-response']?.artists?.index;
     index.forEach((list) =>
@@ -164,7 +164,7 @@ export const fetchArtists = async ({fetch} = {}) => {
 export const fetchAlbums = async ({fetch, id}) => {
   try {
     const [url, props] = await fetchProps('/rest/getArtist.view', {id});
-    const response = await fetch(prerendering ? url.pathname : url.href, props);
+    const response = await fetch(url.href, props);
     const json = await response.json();
     const artist = json['subsonic-response']?.artist;
     artistStore.set(artist);
@@ -178,7 +178,7 @@ export const fetchAlbums = async ({fetch, id}) => {
 export const fetchSongs = async ({fetch, id}) => {
   try {
     const [url, props] = await fetchProps('/rest/getAlbum.view', {id});
-    const response = await fetch(prerendering ? url.pathname : url.href, props);
+    const response = await fetch(url.href, props);
     const json = await response.json();
     const album = json['subsonic-response']?.album;
     albumStore.set(album);
@@ -193,7 +193,7 @@ export const fetchBookmarks = async ({fetch} = {}) => {
   fetch = fetch || globalThis.fetch;
   try {
     const [url, props] = await fetchProps('/rest/getBookmarks.view');
-    const response = await fetch(prerendering ? url.pathname : url.href, props);
+    const response = await fetch(url.href, props);
     const json = await response.json();
     if (json['subsonic-response']?.mesonic?.version) {
       appStore.set({
