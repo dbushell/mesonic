@@ -1,6 +1,16 @@
 #!/bin/zsh
 source ~/.zshrc
 
+killall() {
+  echo "SHUTDOWN"
+  trap '' SIGINT SIGTERM EXIT
+  kill -TERM 0
+  wait
+  echo "DONE"
+}
+
+trap 'killall' SIGINT SIGTERM EXIT
+
 deno run --unstable --allow-all --import-map ~/server/imports.json ~/server/mod.js & ;
 
 (cd ~/client && npm install)
@@ -11,22 +21,6 @@ else
   (cd ~/client && npm run build && node build &)
 fi
 
-caddy run --adapter caddyfile --config - <<EOF
-{
-  auto_https off
-}
+caddy run --adapter caddyfile --config ~/server/Caddyfile &
 
-:4040 {
-  handle /data/* {
-    uri strip_prefix /data
-    root * /data
-    file_server
-  }
-
-  handle /rest/* {
-    reverse_proxy http://localhost:8080
-  }
-
-  reverse_proxy http://localhost:3000
-}
-EOF
+wait

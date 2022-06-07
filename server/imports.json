@@ -1,10 +1,10 @@
 {
   "imports": {
-    "log": "https://deno.land/std@0.132.0/log/mod.ts",
-    "hex": "https://deno.land/std@0.132.0/encoding/hex.ts",
-    "csv": "https://deno.land/std@0.132.0/encoding/csv.ts",
-    "path": "https://deno.land/std@0.132.0/path/mod.ts",
-    "printf": "https://deno.land/std@0.132.0/fmt/printf.ts",
-    "hash": "https://deno.land/std@0.132.0/hash/mod.ts"
+    "log": "https://deno.land/std@0.141.0/log/mod.ts",
+    "hex": "https://deno.land/std@0.141.0/encoding/hex.ts",
+    "csv": "https://deno.land/std@0.141.0/encoding/csv.ts",
+    "path": "https://deno.land/std@0.141.0/path/mod.ts",
+    "printf": "https://deno.land/std@0.141.0/fmt/printf.ts",
+    "hash": "https://deno.land/std@0.141.0/hash/mod.ts"
   }
 }

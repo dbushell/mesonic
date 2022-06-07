@@ -295,6 +295,13 @@ const onConn = async (conn) => {
   }
 };
 
+const onKill = async () => {
+  log.warning('Deno shutdown');
+  Deno.exit();
+};
+
+Deno.addSignalListener('SIGTERM', onKill);
+
 const server = Deno.listen({port: 8080});
 
 log.info(`🚀 Launched`);

@@ -1,0 +1,17 @@
+{
+  auto_https off
+}
+
+:4040 {
+  handle /data/* {
+    uri strip_prefix /data
+    root * /data
+    file_server
+  }
+
+  handle /rest/* {
+    reverse_proxy http://localhost:8080
+  }
+
+  reverse_proxy http://localhost:3000
+}

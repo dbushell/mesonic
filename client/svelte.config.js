@@ -18,9 +18,13 @@ const config = {
     },
     vite: () => ({
       server: {
+        fs: {
+          allow: ['static']
+        },
         hmr: {
           host: 'localhost',
-          port: 12080
+          port: 3000,
+          clientPort: 4040
         }
       }
     }),
