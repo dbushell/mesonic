@@ -1,5 +1,4 @@
 import {writable, derived, get} from 'svelte/store';
-import {prerendering} from '$app/env';
 import {md5} from './utils.js';
 
 export const offlineStore = writable({db: null, cached: [], downloads: {}});

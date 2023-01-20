@@ -275,7 +275,6 @@ export const createBookmark = async (type_id, position, comment) => {
   position = Number.parseInt(position, 10) || 0;
   comment = String(comment);
   type = type || 'song';
-  await sqlite.deleteBookmark(id, type);
   await sqlite.insertBookmark({entity_id: id, type, position, comment});
   // Add meta for podcasts
   if (['episode'].includes(type)) {

@@ -11,23 +11,18 @@ if (isServer) {
   adapter = nodeAdapter;
 }
 
+// // TODO: fix prerender
+// const config = {
+//   kit: {
+//     prerender: {
+//       default: !isServer
+//     },
+//     adapter: adapter()
+//   }
+// };
+
 const config = {
   kit: {
-    prerender: {
-      default: !isServer
-    },
-    vite: () => ({
-      server: {
-        fs: {
-          allow: ['static']
-        },
-        hmr: {
-          host: 'localhost',
-          port: 3000,
-          clientPort: 4040
-        }
-      }
-    }),
     adapter: adapter()
   }
 };

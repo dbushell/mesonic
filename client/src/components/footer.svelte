@@ -9,11 +9,17 @@
   aria-label="information"
 >
   <p class="text-dark text-center text-nowrap d-inline-flex m-0">
-    <span>v0.20.2 &nbsp;|&nbsp; © {year}</span>
-    <a href="https://dbushell.com/" class="text-dark mx-2" target="_blank">
+    <span>v0.22.0 &nbsp;|&nbsp; © {year}</span>
+    <a
+      rel="noreferrer"
+      href="https://dbushell.com/"
+      class="text-dark mx-2"
+      target="_blank"
+    >
       David Bushell
     </a>
     <a
+      rel="noreferrer"
       href="https://github.com/dbushell/mesonic"
       class="text-dark"
       target="_blank"

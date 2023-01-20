@@ -1,16 +1,3 @@
-<script context="module">
-  import {songStore, fetchBookmarks} from '../stores.js';
-
-  export const load = async ({fetch}) => {
-    const props = {fetch};
-    return {
-      props: {
-        bookmarks: await fetchBookmarks(props)
-      }
-    };
-  };
-</script>
-
 <script>
   import {onDestroy} from 'svelte';
   import {
@@ -20,14 +7,16 @@
     deleteBookmark,
     offlineStore,
     playbackStore,
-    serverStore
-  } from '../stores.js';
-  import {addOffline, deleteOffline} from '../offline.js';
-  import {formatTime} from '../utils.js';
-  import Download from '../icons/download.svelte';
-  import Trash from '../icons/trash.svelte';
+    serverStore,
+    songStore
+  } from '../../stores.js';
+  import {addOffline, deleteOffline} from '../../offline.js';
+  import {formatTime} from '../../utils.js';
+  import Download from '../../icons/download.svelte';
+  import Trash from '../../icons/trash.svelte';
 
-  export let bookmarks = [];
+  export let data;
+  $: ({bookmarks} = data);
 
   let server;
   let cached = [];
@@ -104,6 +93,7 @@
   {:else}
     {#each bookmarks as item (item.entry[0].id)}
       <article
+        id="bookmark-{item.entry[0].id}"
         class="list-group-item d-flex flex-wrap justify-content-between align-items-center"
       >
         <h3 class="mt-1 mb-0 h6 lh-base">
@@ -147,7 +137,8 @@
               {:else}
                 <button
                   on:click={(ev) => onOffline(ev, {...item.entry[0]})}
-                  disabled={isOffline || Object.keys(downloads).includes(item.entry[0].id)}
+                  disabled={isOffline ||
+                    Object.keys(downloads).includes(item.entry[0].id)}
                   class="btn me-2 btn-sm btn-outline-secondary"
                   aria-label="download for offline play"
                   type="button"

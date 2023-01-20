@@ -37,15 +37,45 @@ export const getBookmarkByKeyValue = (key, value) =>
 export const insertBookmark = async (data) => {
   await execQuery(
     sqlf(
-      'INSERT INTO `bookmarks`\
-      (`entity_id`,`type`,`position`,`comment`)\
-      VALUES (%d,%s,%d,%s)',
+      'INSERT OR REPLACE INTO `bookmarks`\
+      (`id`, `entity_id`,`type`,`position`,`comment`)\
+      VALUES (%s,%d,%s,%d,%s)',
+      () =>
+        sqlf(
+          '(SELECT `id` FROM `bookmarks` WHERE `entity_id`=%d AND `type`=%s)',
+          data.entity_id,
+          data.type
+        ),
       data.entity_id,
       data.type,
       data.position,
       data.comment
     )
   );
+  // await execQuery(
+  //   sqlf(
+  //     'INSERT OR REPLACE INTO `meta`\
+  //     (`id`,`created_at`,`modified_at`,`entity_id`,`type`,`key`,`value`)\
+  //     VALUES (%s,%s,%s,%d,%s,%s,%s)',
+  //     () =>
+  //       sqlf(
+  //         '(SELECT `id` FROM `meta` WHERE `entity_id`=%d AND `key`=%s)',
+  //         data.entity_id,
+  //         data.key
+  //       ),
+  //     () =>
+  //       sqlf(
+  //         '(SELECT `created_at` FROM `meta` WHERE `entity_id`=%d AND `key`=%s)',
+  //         data.entity_id,
+  //         data.key
+  //       ),
+  //     new Date().toISOString(),
+  //     data.entity_id,
+  //     data.type,
+  //     data.key,
+  //     String(data.value)
+  //   )
+  // );
 };
 
 // Delete bookmark data

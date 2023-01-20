@@ -9,7 +9,7 @@
     scanStore,
     updateServer,
     getScanStatus
-  } from '../stores.js';
+  } from '../../stores.js';
 
   let rate;
   let isMesonic = false;

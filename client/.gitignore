@@ -4,3 +4,4 @@
 !.gitignore
 !package.json
 !svelte.config.js
+!vite.config.js

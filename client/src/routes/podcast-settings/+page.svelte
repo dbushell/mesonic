@@ -1,20 +1,8 @@
-<script context="module">
-  import {fetchPodcasts} from '../stores.js';
-
-  export const load = async ({fetch}) => {
-    const props = {fetch};
-    return {
-      props: {
-        podcasts: await fetchPodcasts(props)
-      }
-    };
-  };
-</script>
-
 <script>
-  import {createPodcast, deletePodcast} from '../stores.js';
+  import {createPodcast, deletePodcast, fetchPodcasts} from '../../stores.js';
 
-  export let podcasts = [];
+  export let data;
+  $: ({podcasts} = data);
 
   const refresh = async () => {
     podcasts = await fetchPodcasts();

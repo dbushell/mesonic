@@ -1,6 +1,6 @@
-import {build, timestamp} from '$service-worker';
+import {build, version} from '$service-worker';
 
-const cacheName = `svelte-${timestamp}`;
+const cacheName = `svelte-${version}`;
 
 const preCache = ['/', ...build];
 

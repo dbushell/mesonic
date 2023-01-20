@@ -1,27 +1,14 @@
-<script context="module">
-  import {fetchAlbums} from '../stores.js';
-
-  export const load = async ({fetch, params}) => {
-    const props = {fetch, id: params.id};
-    return {
-      props: {
-        albums: await fetchAlbums(props)
-      }
-    };
-  };
-</script>
-
 <script>
   import {onDestroy} from 'svelte';
-  import {albumStore, songStore} from '../stores.js';
-  import {formatTime} from '../utils.js';
+  import {artistStore, songStore} from '../stores.js';
   import Headphones from '../icons/headphones.svelte';
   import Folder from '../icons/folder.svelte';
 
-  export let albums = [];
+  export let data;
+  $: ({artists} = data);
 
+  let artist;
   let song;
-  let album;
   let unsubscribe = [];
 
   onDestroy(() => {
@@ -29,8 +16,8 @@
   });
 
   unsubscribe.push(
-    albumStore.subscribe((state) => {
-      album = state;
+    artistStore.subscribe((state) => {
+      artist = state;
     })
   );
 
@@ -41,29 +28,29 @@
   );
 </script>
 
-<h2 class="visually-hidden">Albums</h2>
+<h2 class="visually-hidden">Artists</h2>
 <div class="list-group">
-  {#if albums.length === 0}
+  {#if artists.length === 0}
     <div class="list-group-item text-danger border-danger">
-      Failed to fetch albums
+      Failed to fetch artists
     </div>
   {:else}
-    {#each albums as item (item.id)}
+    {#each artists as item (item.id)}
       <a
         href="/{item.id}"
         class="list-group-item list-group-item-action d-flex justify-content-between align-items-start pe-2"
-        class:text-primary={song && song.albumId === item.id}
+        class:text-primary={song && song.artistId === item.id}
       >
         <span class="lh-sm">
-          {#if song && song.albumId === item.id}
+          {#if song && song.artistId === item.id}
             <Headphones />
-          {:else if album && album.id === item.id}
+          {:else if artist && artist.id === item.id}
             <Folder />
           {/if}
           {item.name}
         </span>
         <span class="badge bg-light text-dark font-monospace ms-1">
-          {item.duration ? formatTime(item.duration) : item.songCount}
+          {item.albumCount}
         </span>
       </a>
     {/each}

@@ -8,9 +8,9 @@ ENV MESONIC_CONFIG ${MESONIC_CONFIG:-/config}
 ENV MESONIC_DEV ${MESONIC_DEV:-0}
 USER root
 
-RUN apt update \
-  && apt upgrade -y \
-  && apt install -y ffmpeg sqlite3
+#RUN apt update \
+#  && apt upgrade -y \
+#  && apt install -y ffmpeg sqlite3
 
 RUN mkdir -p ${MESONIC_MEDIA} \
   && mkdir -p ${MESONIC_PODCASTS} \

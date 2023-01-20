@@ -1,23 +1,11 @@
-<script context="module">
-  import {fetchSongs} from '../stores.js';
-
-  export const load = async ({fetch, params}) => {
-    const props = {fetch, id: params.id};
-    return {
-      props: {
-        songs: await fetchSongs(props)
-      }
-    };
-  };
-</script>
-
 <script>
   import {onDestroy} from 'svelte';
-  import {songStore, bookmarkStore} from '../stores.js';
-  import {formatTime} from '../utils.js';
-  import Headphones from '../icons/headphones.svelte';
+  import {songStore, bookmarkStore} from '../../stores.js';
+  import {formatTime} from '../../utils.js';
+  import Headphones from '../../icons/headphones.svelte';
 
-  export let songs = [];
+  export let data;
+  $: ({songs} = data);
 
   let song;
   let unsubscribe = [];
