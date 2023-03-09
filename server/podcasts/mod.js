@@ -66,7 +66,10 @@ export const syncPodcast = async (podcast) => {
 // Sync all podcast episodes
 export const syncPodcasts = async () => {
   const podcasts = await sqlite.getPodcasts();
-  await Promise.all(podcasts.map(syncPodcast));
+  // await Promise.all(podcasts.map(syncPodcast));
+  for (const podcast of podcasts) {
+    await syncPodcast(podcast);
+  }
   await sqlite.deleteEpisodeOrphans();
 };
 

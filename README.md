@@ -1,5 +1,13 @@
 # meSonic
 
+## 🔥 New Hotness!
+
+I am rewriting **[meSonic²**](https://github.com/dbushell/mesonic2) from scratch!
+
+* * *
+
+## 🥀 Old and Busted
+
 **meSonic** is an experimental **media server** and **web client** partially compatible with the Subsonic API. At present I'm developing this for personal use but I'll provide more documentation in time.
 
 See the blog articles below for more information.

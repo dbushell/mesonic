@@ -104,6 +104,7 @@ export const fetchFeed = async (url) => {
     }
   } catch (err) {
     log.warning(`Failed to fetch: "${url}"`);
+    log.error(err.messge ?? err);
   }
   return false;
 };

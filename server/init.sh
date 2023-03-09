@@ -1,10 +1,6 @@
 #!/bin/zsh
 source ~/.zshrc
 
-echo user | sudo -S apt update
-echo user | sudo -S apt upgrade -y
-echo user | sudo -S apt install -y ffmpeg sqlite3
-
 killall() {
   echo "SHUTDOWN"
   trap '' SIGINT SIGTERM EXIT
