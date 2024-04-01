@@ -2,7 +2,7 @@
 
 ## 🔥 New Hotness!
 
-I am rewriting [**meSonic²**](https://github.com/dbushell/mesonic2) from scratch!
+I am rewriting [~meSonic²~](https://github.com/dbushell/mesonic2) - [**sauroPod**](https://github.com/dbushell/sauroPod/) from scratch!
 
 * * *
 
