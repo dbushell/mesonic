@@ -24,4 +24,4 @@ See the blog articles below for more information.
 
 * * *
 
-Copyright © 2023 [David Bushell](https://dbushell.com) | [@dbushell](https://twitter.com/dbushell)
+Copyright © 2023 [David Bushell](https://dbushell.com)
